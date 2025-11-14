@@ -5,7 +5,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 import { Flowbite, ThemeModeScript } from "flowbite-react";
 import customTheme from "@/utils/theme/custom-theme";
 import "./css/globals.css";
-import { GlobalToast } from "./components/toast";
+import { GlobalToast } from "@/components/toast";
 
 const manrope = Manrope({ subsets: ["latin"] });
 

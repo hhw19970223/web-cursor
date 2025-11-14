@@ -11,6 +11,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  Spinner,
   TextInput,
 } from "flowbite-react";
 import { v4 } from "uuid";
@@ -25,7 +26,12 @@ const Profile = () => {
   const [cookieTxt, setCookieTxt] = useState("");
 
   const cleanLogin = () => {
-    useLoginStore.setState({ loginInfo: null, cookie: "", cursorUser: null, email: "" });
+    useLoginStore.setState({
+      loginInfo: null,
+      cookie: "",
+      cursorUser: null,
+      email: "",
+    });
   };
 
   const closeModal = () => {
@@ -58,7 +64,7 @@ const Profile = () => {
         body: JSON.stringify({ token: loginInfo.accessToken, traceparent }),
       })
         .then((res) => {
-          return res.json()
+          return res.json();
         })
         .then((res) => {
           useLoginStore.setState({ email: res.email });
@@ -68,36 +74,31 @@ const Profile = () => {
           showToast("error", "token 过期请重新登录");
         });
     }
-
-    
-    
-
   }, [cursorUser, loginInfo, cookie]);
 
-  useEffect(() => {
-    window.test = () => {
-      const params = encodeURIComponent(JSON.stringify({ token: loginInfo?.accessToken, traceparent, xRequestId: v4() }));
-      const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
+  // useEffect(() => {
+  //   window.test = () => {
+  //     const params = encodeURIComponent(JSON.stringify({ token: loginInfo?.accessToken, traceparent, xRequestId: v4() }));
+  //     const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
 
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data?.message?.streamUnifiedChatResponse) {
-          console.log(data.message.streamUnifiedChatResponse);
-          console.warn(data.message.streamUnifiedChatResponse.text);
-        }
-      };
-  
-      eventSource.onerror = (err) => {
-        console.error('SSE error:', err);
-        eventSource.close();
-      };
-    }
-  }, [loginInfo]);
+  //     eventSource.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       if (data?.message?.streamUnifiedChatResponse) {
+  //         console.log(data.message.streamUnifiedChatResponse);
+  //         console.warn(data.message.streamUnifiedChatResponse.text);
+  //       }
+  //     };
+
+  //     eventSource.onerror = (err) => {
+  //       console.error('SSE error:', err);
+  //       eventSource.close();
+  //     };
+  //   }
+  // }, [loginInfo]);
 
   const onLogin = async () => {
     const uuid = v4();
     cleanLogin();
-    
 
     const verifier = "fBkpWJ6GxvcLGBELpLV0meh0KHOFtj-46PSqeW3oyLw";
     const challenge = "ykVpcg1QuMe5fx7cjBwG6N7s_YRWMR5oa5Y_qeeMpIA";
@@ -125,17 +126,24 @@ const Profile = () => {
           // setOneModal(true);
           if (interval.current) {
             clearInterval(interval.current);
+            interval.current = null;
           }
         });
     }, 1000);
   };
 
+  useEffect(() => { 
+    return () => {
+      if (interval.current) {
+        clearInterval(interval.current);
+        interval.current = null;
+      }
+    }
+  }, []);
+
   return (
     <>
-      {cursorUser || email ? (
-        <span className="text-sm text-gray-500 ml-2">{cursorUser?.email || email}</span>
-      ) : null}
-      <div className="relative group/menu">
+      <div className="relative group/menu flex items-center">
         {loginInfo ? (
           <span className="h-10 w-10 hover:text-primary hover:bg-lightprimary rounded-full flex justify-center items-center cursor-pointer group-hover/menu:bg-lightprimary group-hover/menu:text-primary">
             <Dropdown
@@ -163,9 +171,16 @@ const Profile = () => {
             className="w-full bg-primary text-white rounded-xl cursor-pointer hover:shadow-sm hover:opacity-80"
             onClick={onLogin}
           >
+            { interval.current ?  <Spinner size="sm" aria-label="Info spinner example" className="me-3" light /> : null }
             Login
           </Button>
         )}
+
+        {cursorUser || email ? (
+          <span className="text-sm text-gray-500 ml-2">
+            {cursorUser?.email || email}
+          </span>
+        ) : null}
 
         <Modal show={openModal} onClose={closeModal} popup>
           <ModalHeader />
@@ -209,7 +224,6 @@ const Profile = () => {
 };
 
 export default Profile;
-
 
 function X7c() {
   const i = new Uint8Array(16);
