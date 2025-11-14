@@ -17,7 +17,6 @@ import { v4 } from "uuid";
 import { useGlobalComponentsStore } from "@/stores/global-components";
 
 const traceparent = `00-${X7c()}-${Q7c()}-00`;
-
 const Profile = () => {
   const { loginInfo, cursorUser, cookie, email } = useLoginStore();
   const interval = useRef<NodeJS.Timeout | null>(null);
@@ -69,7 +68,31 @@ const Profile = () => {
           showToast("error", "token 过期请重新登录");
         });
     }
+
+    
+    
+
   }, [cursorUser, loginInfo, cookie]);
+
+  useEffect(() => {
+    window.test = () => {
+      const params = encodeURIComponent(JSON.stringify({ token: loginInfo?.accessToken, traceparent, xRequestId: v4() }));
+      const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data?.message?.streamUnifiedChatResponse) {
+          console.log(data.message.streamUnifiedChatResponse);
+          console.warn(data.message.streamUnifiedChatResponse.text);
+        }
+      };
+  
+      eventSource.onerror = (err) => {
+        console.error('SSE error:', err);
+        eventSource.close();
+      };
+    }
+  }, [loginInfo]);
 
   const onLogin = async () => {
     const uuid = v4();

@@ -7,7 +7,7 @@
       "request": "launch",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 9230,
+      "port": 9232,
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"],
       "env": {

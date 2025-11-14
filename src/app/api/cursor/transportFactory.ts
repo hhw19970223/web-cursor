@@ -8,7 +8,7 @@
 
 // 导入必要的模块
 const { createConnectTransport, compressionGzip } = require("@connectrpc/connect-node");
-const { Cookie } = require("tough-cookie");
+const { Cookie, CookieJar } = require("tough-cookie");
 const { Agent } = require("https");
 const dns = require("dns");
 const { randomUUID, randomBytes } = require("crypto");
@@ -55,6 +55,99 @@ function maybeGetSpoofedCppAccessToken(e, t) {
     : e;
 }
 
+const PBe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+  IBe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function qd({ buffer: s }, e = !0, t = !1) {
+  const n = t ? IBe : PBe;
+  let r = "";
+  const a = s.byteLength % 3;
+  let o = 0;
+  for (; o < s.byteLength - a; o += 3) {
+    const c = s[o + 0],
+      l = s[o + 1],
+      d = s[o + 2];
+    (r += n[c >>> 2]),
+      (r += n[((c << 4) | (l >>> 4)) & 63]),
+      (r += n[((l << 2) | (d >>> 6)) & 63]),
+      (r += n[d & 63]);
+  }
+  if (a === 1) {
+    const c = s[o + 0];
+    (r += n[c >>> 2]), (r += n[(c << 4) & 63]), e && (r += "==");
+  } else if (a === 2) {
+    const c = s[o + 0],
+      l = s[o + 1];
+    (r += n[c >>> 2]),
+      (r += n[((c << 4) | (l >>> 4)) & 63]),
+      (r += n[(l << 2) & 63]),
+      e && (r += "=");
+  }
+  return r;
+}
+
+function CYe(s) {
+  if (s === !0) return "true";
+  if (s === !1) return "false";
+  if (s === void 0) return "implicit-false";
+  {
+    let e = s;
+    return (e = e), "true";
+  }
+}
+
+function RYe(s) {
+  let e = 165;
+  for (let t = 0; t < s.length; t++)
+    (s[t] = (s[t] ^ e) + (t % 256)), (e = s[t]);
+  return s;
+}
+
+const getRequestHeadersExceptAccessToken = function ({
+  req: e,
+  machineId: n,
+  macMachineId: r,
+  base64Fn: s,
+  cursorVersion: o,
+  privacyMode: i,
+  eligibleForSnippetLearning: a,
+  backupRequestId: l,
+  clientKey: u,
+  sessionId: c,
+  configVersion: m,
+}) {
+  try {
+
+    e.header.set(
+      "x-cursor-checksum",
+      `Q_z-5wXCe59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877`
+    );
+  } catch (e) {
+    console.error(e);
+  }
+  e.header.set('x-cursor-client-version', o),
+    void 0 !== m &&
+      "" !== m &&
+      e.header.set("x-cursor-config-version", m),
+    void 0 !== c && e.header.set('x-session-id', c),
+    e.header.set(
+      'x-new-onboarding-completed',
+      a && !1 === i ? "true" : "false"
+    ),
+    e.header.set('x-ghost-mode', CYe(i)),
+    void 0 !== u && e.header.set("x-client-key", u);
+  try {
+    const t = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    e.header.set("x-cursor-timezone", t);
+  } catch (e) {}
+  try {
+    l &&
+      (e.header.has("x-request-id") ||
+        e.header.set("x-request-id", l),
+      e.header.has("x-amzn-trace-id") ||
+        e.header.set("x-amzn-trace-id", `Root=${l}`));
+  } catch (e) {}
+}
+
 /**
  * TransportFactory 类
  * 负责创建和管理 HTTP/HTTP2 传输连接
@@ -78,7 +171,7 @@ class TransportFactory {
    * @param {Function} getAccessToken - 获取访问令牌的函数
    */
   constructor(getAccessToken) {
-    this.cookieJar = new Cookie();
+    this.cookieJar = new CookieJar();
     this.getAccessToken = getAccessToken;
     this.clientKey = randomBytes(32);
     
@@ -122,7 +215,7 @@ class TransportFactory {
    * @param {string} options.useHttp2FromServerConfig - 服务器配置的 HTTP/2 设置
    * @returns {Object} 包含 transport、isHttp2 和 usage 的对象
    */
-  createTransport(options) {
+  createTransport(options, cfg) {
     const {
       baseUrl,
       useHttp2,
@@ -167,7 +260,7 @@ class TransportFactory {
       baseUrl: processedBaseUrl,
       maybeUseCppSpoofToken,
       overrideAuthToken,
-    });
+    }, this.clientKey.toString("hex"), cfg);
 
     // 为特定域名配置自定义 DNS 查找（用于 gcpp 和 api4.cursor.sh）
     const dnsLookup =
@@ -255,11 +348,29 @@ class TransportFactory {
     baseUrl,
     maybeUseCppSpoofToken,
     overrideAuthToken,
-  }) {
+  }, clientKey, cfg) {
     const interceptors = [];
 
     // 拦截器 3: 认证令牌拦截器
     interceptors.push((next) => async (request) => {
+
+      if (cfg['x-request-id']) {
+        getRequestHeadersExceptAccessToken({
+          req: request,
+          machineId: 'e59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877',
+          macMachineId: '36326faa1613d4c93a9db643e2bcd7a67730cf6493a8447e47c21d3643f7c0f5',
+          base64Fn: (k) => qd(wrap(k), !1, !0),
+          cursorVersion: '1.5.5',
+          privacyMode: true,
+          eligibleForSnippetLearning: true,
+          sessionId: 'db18da73-e8bb-4513-91c4-c248196848ea',
+          backupRequestId: cfg['x-request-id'],
+          clientKey: clientKey,
+          configVersion: 'b057550d-1277-4726-b190-7ec7450b17a6',
+        })
+      }
+      
+
       // 如果提供了覆盖令牌函数，优先使用
       if (overrideAuthToken) {
         const token = await overrideAuthToken();
@@ -327,7 +438,7 @@ class TransportFactory {
           request.header.set("Cookie", newCookieString);
         }
       } catch (e) {
-        
+        console.error(e);
       }
 
       // 执行请求
@@ -388,6 +499,25 @@ class TransportFactory {
   }
 }
 
+/**
+ * 将 Uint8Array 或其他类型化数组包装成 Buffer
+ * 替代 proto3.util.wrap 方法
+ */
+function wrap(data: Uint8Array | Buffer): Buffer {
+  // 如果已经是 Buffer，直接返回
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+  
+  // 如果是 Uint8Array 或其他 TypedArray，转换为 Buffer
+  if (ArrayBuffer.isView(data)) {
+    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  }
+  
+  // 兜底：尝试直接转换
+  return Buffer.from(data as any);
+}
+
 // 导出 TransportFactory 类
-module.exports = { TransportFactory };
+module.exports = { TransportFactory, wrap };
 

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 4000",
     "lint": "next lint",
-    "debug": "node --inspect-brk=9230 ./node_modules/next/dist/bin/next dev"
+    "debug": "node --inspect-brk=9232 ./node_modules/next/dist/bin/next dev"
   },
   "dependencies": {
     "@bufbuild/buf": "^1.59.0",

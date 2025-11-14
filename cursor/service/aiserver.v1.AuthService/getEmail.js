@@ -1,6 +1,7 @@
+// @ts-nocheck
+
 import { Message, proto3 } from "@bufbuild/protobuf";
 
-// 从 proto3.util 中解构需要的方法
 const { initPartial, setEnumType, newFieldList, equals } = proto3.util;
 
 
