@@ -24,7 +24,7 @@ const Header = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-[5] ${isSticky
+        className={`sticky top-0 z-[5] shadow-[0_6px_12px_rgba(0,0,0,0.12)] ${isSticky
             ? "bg-white dark:bg-dark fixed w-full"
             : "bg-white"
           }`}

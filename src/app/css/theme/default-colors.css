@@ -1,6 +1,6 @@
 :root {
     --color-primary: #635bff;
-    --color-secondary: #14E9E2;
+    --color-secondary: lab(96.52% -.0000298023 .0000119209);
     --color-primary-emphasis: #0091E5;
     --color-secondary-emphasis: #673ADE;
     --color-lightprimary: #4400ff20;

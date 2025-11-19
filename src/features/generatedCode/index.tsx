@@ -17,7 +17,11 @@ export function GeneratedCode() {
         >
           <EditCode />
           <Output />
-          <Chat />
+          <div className="w-full h-full max-h-full overflow-hidden relative bg-white">
+            <div className="w-full h-full overflow-auto">
+              <Chat />
+            </div>
+          </div>
         </Split>
       </GeneratedCodeStateContextProvider>
     </div>

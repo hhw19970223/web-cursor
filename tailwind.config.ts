@@ -67,6 +67,7 @@ const config: Config = {
         dark: "var(--color-dark)",
         link: "var(--color-link)",
         darklink: "var(--color-darklink)",
+        foreground: "lab(2.75381% 0 0)",
       },
     },
   },
