@@ -1,0 +1,8 @@
+<ds namespace="H" database="hhw">
+    <table name="hhw" primary="name">
+        <comment>存储过程</comment>
+        <varchar name="name" length="64">存储器名</varchar>
+        <text name="text">存储过程</text>
+        <varchar name="ext" length="64">描述</varchar>
+    </table>
+</ds>

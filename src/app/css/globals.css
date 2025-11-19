@@ -116,3 +116,12 @@
 .simplebar-content {
   height: 100% !important;
 }
+
+.gutter-horizontal {
+  cursor: ew-resize;
+  background: #4400ff20;
+}
+
+.gutter-horizontal:hover {
+  background: #635bff;
+}

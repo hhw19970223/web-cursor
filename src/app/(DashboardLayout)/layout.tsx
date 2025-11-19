@@ -10,14 +10,10 @@ export default function Layout({
   return (
     <div className="flex w-full min-h-screen">
       <div className="page-wrapper flex w-full">
-        <div className="body-wrapper w-full bg-white dark:bg-dark">
+        <div className="body-wrapper w-full bg-white dark:bg-dark flex overflow-hidden flex-col">
           <Header />
-          <div className="bg-lightgray rounded-page min-h-[90vh]">
-            <div
-              className='flex h-[90vh] w-full overflow-y-auto overflow-x-hidden'
-            >
-              {children}
-            </div>
+          <div className="flex-1 relative overflow-y-auto overflow-x-hidden">
+            {children}
           </div>
         </div>
       </div>
