@@ -24,6 +24,7 @@
     "apexcharts": "^4.7.0",
     "axios": "^1.12.2",
     "buffer": "^6.0.3",
+    "clsx": "^2.1.1",
     "crypto": "^1.0.1",
     "dayjs": "^1.11.19",
     "flowbite": "2.3.0",
