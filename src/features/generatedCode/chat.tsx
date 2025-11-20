@@ -46,6 +46,8 @@ import { nanoid } from "nanoid";
 import { useCallback, useState } from "react";
 import { useGlobalComponentsStore } from "@/stores/global-components";
 import { Button } from "flowbite-react";
+import { useGeneratedCodeStore } from "./context";
+import { aria_browseract_tag } from "@/utils/dom";
 
 type MessageType = {
   key: string;
@@ -273,6 +275,7 @@ export const Chat = () => {
   );
 
   const { showToast } = useGlobalComponentsStore();
+  const { selectTags } = useGeneratedCodeStore(selector => selector);
 
   const streamResponse = useCallback(
     async (messageId: string, content: string) => {
@@ -355,6 +358,14 @@ export const Chat = () => {
     if (!(hasText || hasAttachments)) {
       return;
     }
+
+    const newText = message.text.replace(/@\d+/g, (match) => {
+      const num = Number(match.slice(1)); // 取数字
+      const flag = selectTags.some(info => info.tag === num + '');
+      return flag ? `属性${aria_browseract_tag}的值为${num}的元素` : match;
+    });
+
+    console.log(newText);
 
     setStatus("submitted");
 
@@ -439,6 +450,7 @@ export const Chat = () => {
                   <PromptInputTextarea
                     onChange={(event) => setText(event.target.value)}
                     value={text}
+                    placeholder = "你想做些什么? (@tag 选择选中的元素)"
                   />
                 </PromptInputBody>
                 <PromptInputFooter>
