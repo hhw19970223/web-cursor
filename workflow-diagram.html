@@ -174,5 +174,160 @@
         
     </div>
     
+    <!-- 选择框 -->
+    <div id="selectionBox" style="position: fixed; border: 2px dashed #00d9a3; background: rgba(0, 217, 163, 0.1); pointer-events: none; display: none; z-index: 9999;"></div>
+    
+    <script>
+        (function() {
+            let isSelecting = false;
+            let startX = 0;
+            let startY = 0;
+            let selectionBox = document.getElementById('selectionBox');
+            let selectedElements = new Set();
+            
+            // 监听 Ctrl 键按下
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && !isSelecting) {
+                    document.body.style.cursor = 'crosshair';
+                    document.body.style.userSelect = 'none';
+                }
+            });
+            
+            // 监听 Ctrl 键释放
+            document.addEventListener('keyup', function(e) {
+                if (!e.ctrlKey && !isSelecting) {
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+            
+            // 鼠标按下事件
+            document.addEventListener('mousedown', function(e) {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    isSelecting = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    
+                    selectionBox.style.left = startX + 'px';
+                    selectionBox.style.top = startY + 'px';
+                    selectionBox.style.width = '0px';
+                    selectionBox.style.height = '0px';
+                    selectionBox.style.display = 'block';
+                    
+                    // 清除之前的选中状态
+                    clearSelection();
+                }
+            });
+            
+            // 鼠标移动事件
+            document.addEventListener('mousemove', function(e) {
+                if (isSelecting) {
+                    const currentX = e.clientX;
+                    const currentY = e.clientY;
+                    
+                    const left = Math.min(startX, currentX);
+                    const top = Math.min(startY, currentY);
+                    const width = Math.abs(currentX - startX);
+                    const height = Math.abs(currentY - startY);
+                    
+                    selectionBox.style.left = left + 'px';
+                    selectionBox.style.top = top + 'px';
+                    selectionBox.style.width = width + 'px';
+                    selectionBox.style.height = height + 'px';
+                    
+                    // 更新选中的元素
+                    updateSelection(left, top, width, height);
+                }
+            });
+            
+            // 鼠标释放事件
+            document.addEventListener('mouseup', function(e) {
+                if (isSelecting) {
+                    isSelecting = false;
+                    selectionBox.style.display = 'none';
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    
+                    // 输出选中的元素信息
+                    if (selectedElements.size > 0) {
+                        console.log('选中的元素数量:', selectedElements.size);
+                        selectedElements.forEach(el => {
+                            console.log('选中元素:', el);
+                        });
+                    }
+                }
+            });
+            
+            // 更新选中的元素
+            function updateSelection(left, top, width, height) {
+                clearSelection();
+                selectedElements.clear();
+                
+                // 获取所有可选择的元素（排除选择框本身和 body）
+                const allElements = document.querySelectorAll('*:not(#selectionBox):not(body):not(html)');
+                
+                allElements.forEach(element => {
+                    const rect = element.getBoundingClientRect();
+                    
+                    // 检查元素是否满足选择条件：宽度或高度完全在选择框内，并且有重合
+                    if (isOverlapping(left, top, width, height, rect.left, rect.top, rect.width, rect.height)) {
+                        selectedElements.add(element);
+                        element.style.outline = '2px solid #00d9a3';
+                        element.style.outlineOffset = '2px';
+                        element.style.backgroundColor = element.style.backgroundColor || '';
+                        element.style.backgroundColor = 'rgba(0, 217, 163, 0.2)';
+                    }
+                });
+            }
+            
+            // 检查元素是否满足选择条件：宽度或高度完全在选择框内，并且有重合
+            function isOverlapping(x1, y1, w1, h1, x2, y2, w2, h2) {
+                // 选择框的边界
+                const selectionLeft = x1;
+                const selectionRight = x1 + w1;
+                const selectionTop = y1;
+                const selectionBottom = y1 + h1;
+                
+                // 元素的边界
+                const elementLeft = x2;
+                const elementRight = x2 + w2;
+                const elementTop = y2;
+                const elementBottom = y2 + h2;
+                
+                // 检查宽度是否完全在选择框内
+                const widthFullyInside = elementLeft >= selectionLeft && elementRight <= selectionRight;
+                
+                // 检查高度是否完全在选择框内
+                const heightFullyInside = elementTop >= selectionTop && elementBottom <= selectionBottom;
+                
+                // 检查两个矩形是否有重叠（在X轴和Y轴都有重叠）
+                const hasOverlapX = !(selectionRight < elementLeft || elementRight < selectionLeft);
+                const hasOverlapY = !(selectionBottom < elementTop || elementBottom < selectionTop);
+                const hasOverlap = hasOverlapX && hasOverlapY;
+                
+                // 宽度完全在区域内并且有重合，或者高度完全在区域内并且有重合
+                return (widthFullyInside && hasOverlap) || (heightFullyInside && hasOverlap);
+            }
+            
+            // 清除选中状态
+            function clearSelection() {
+                selectedElements.forEach(element => {
+                    element.style.outline = '';
+                    element.style.outlineOffset = '';
+                    element.style.backgroundColor = '';
+                });
+                selectedElements.clear();
+            }
+            
+            // 防止 Ctrl+拖拽时触发文本选择
+            document.addEventListener('selectstart', function(e) {
+                if (isSelecting || (e.ctrlKey && e.button === 0)) {
+                    e.preventDefault();
+                }
+            });
+        })();
+    </script>
+    
 </body>
 </html>
