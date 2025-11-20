@@ -16,7 +16,11 @@ export function GeneratedCode() {
           style={{ display: "flex", height: "100%", width: "100%" }}
         >
           <EditCode />
-          <Output />
+          <div className="w-full h-full max-h-full overflow-hidden relative bg-white">
+            <div className="w-full h-full overflow-auto">
+              <Output />
+            </div>
+          </div>
           <div className="w-full h-full max-h-full overflow-hidden relative bg-white">
             <div className="w-full h-full overflow-auto">
               <Chat />
