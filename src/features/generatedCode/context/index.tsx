@@ -211,6 +211,11 @@ const createContextProviderStore: () => StoreApi<GeneratedCodeStore> = () =>
       setLoading: (value) => {
         set({ loading: value });
       },
+
+      selectTags: [],
+      setSelectTags: (value) => {
+        set({ selectTags: value });
+      },
     };
   });
 

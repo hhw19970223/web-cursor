@@ -177,6 +177,16 @@
     <!-- 选择框 -->
     <div id="selectionBox" style="position: fixed; border: 2px dashed #00d9a3; background: rgba(0, 217, 163, 0.1); pointer-events: none; display: none; z-index: 9999;"></div>
     
+    <!-- Textarea 输入框容器 -->
+    <div style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); width: 600px; z-index: 1000;">
+        <textarea id="mentionTextarea" placeholder="输入 @ 来提及用户..." style="width: 100%; min-height: 120px; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s;"></textarea>
+        
+        <!-- @mention 面板 -->
+        <div id="mentionPanel" style="display: none; position: absolute; bottom: 100%; left: 0; width: 100%; max-height: 200px; overflow-y: auto; background: white; border: 2px solid #00d9a3; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); margin-bottom: 8px; z-index: 1001;">
+            <div id="mentionList" style="padding: 8px 0;"></div>
+        </div>
+    </div>
+    
     <script>
         (function() {
             let isSelecting = false;
@@ -324,6 +334,182 @@
             document.addEventListener('selectstart', function(e) {
                 if (isSelecting || (e.ctrlKey && e.button === 0)) {
                     e.preventDefault();
+                }
+            });
+        })();
+    </script>
+    
+    <!-- @mention 功能 -->
+    <script>
+        (function() {
+            const textarea = document.getElementById('mentionTextarea');
+            const mentionPanel = document.getElementById('mentionPanel');
+            const mentionList = document.getElementById('mentionList');
+            
+            // 示例用户列表（可以替换为实际数据）
+            const users = [
+                { id: 1, name: '张三', avatar: '👤' },
+                { id: 2, name: '李四', avatar: '👨' },
+                { id: 3, name: '王五', avatar: '👩' },
+                { id: 4, name: '赵六', avatar: '🧑' },
+                { id: 5, name: '钱七', avatar: '👧' },
+                { id: 6, name: '孙八', avatar: '👦' },
+                { id: 7, name: '周九', avatar: '🧒' },
+                { id: 8, name: '吴十', avatar: '👶' }
+            ];
+            
+            let currentMentionIndex = -1;
+            let mentionStartPos = -1;
+            let filteredUsers = [];
+            
+            // 监听输入事件
+            textarea.addEventListener('input', function(e) {
+                const value = textarea.value;
+                const cursorPos = textarea.selectionStart;
+                
+                // 查找光标前的 @ 符号
+                const textBeforeCursor = value.substring(0, cursorPos);
+                const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+                
+                if (lastAtIndex !== -1) {
+                    // 检查 @ 后面是否有空格或换行，如果有则关闭面板
+                    const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+                    if (textAfterAt.includes(' ') || textAfterAt.includes('\n')) {
+                        hideMentionPanel();
+                        return;
+                    }
+                    
+                    // 获取 @ 后的搜索关键词
+                    const searchTerm = textAfterAt.toLowerCase();
+                    mentionStartPos = lastAtIndex;
+                    
+                    // 过滤用户列表
+                    filteredUsers = users.filter(user => 
+                        user.name.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (filteredUsers.length > 0) {
+                        showMentionPanel();
+                        renderMentionList();
+                        currentMentionIndex = -1;
+                    } else {
+                        hideMentionPanel();
+                    }
+                } else {
+                    hideMentionPanel();
+                }
+            });
+            
+            // 监听键盘事件
+            textarea.addEventListener('keydown', function(e) {
+                if (mentionPanel.style.display === 'none') return;
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentMentionIndex = (currentMentionIndex + 1) % filteredUsers.length;
+                    updateMentionListHighlight();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentMentionIndex = currentMentionIndex <= 0 ? filteredUsers.length - 1 : currentMentionIndex - 1;
+                    updateMentionListHighlight();
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    if (currentMentionIndex >= 0 && currentMentionIndex < filteredUsers.length) {
+                        selectMention(filteredUsers[currentMentionIndex]);
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    hideMentionPanel();
+                }
+            });
+            
+            // 显示提及面板
+            function showMentionPanel() {
+                mentionPanel.style.display = 'block';
+            }
+            
+            // 隐藏提及面板
+            function hideMentionPanel() {
+                mentionPanel.style.display = 'none';
+                currentMentionIndex = -1;
+                mentionStartPos = -1;
+            }
+            
+            // 渲染提及列表
+            function renderMentionList() {
+                mentionList.innerHTML = '';
+                
+                filteredUsers.forEach((user, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'mention-item';
+                    item.style.cssText = 'padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color 0.2s;';
+                    item.innerHTML = `
+                        <span style="font-size: 20px;">${user.avatar}</span>
+                        <span style="font-size: 14px; color: #333;">${user.name}</span>
+                    `;
+                    
+                    item.addEventListener('mouseenter', function() {
+                        currentMentionIndex = index;
+                        updateMentionListHighlight();
+                    });
+                    
+                    item.addEventListener('click', function() {
+                        selectMention(user);
+                    });
+                    
+                    mentionList.appendChild(item);
+                });
+                
+                updateMentionListHighlight();
+            }
+            
+            // 更新列表高亮
+            function updateMentionListHighlight() {
+                const items = mentionList.querySelectorAll('.mention-item');
+                items.forEach((item, index) => {
+                    if (index === currentMentionIndex) {
+                        item.style.backgroundColor = '#00d9a3';
+                        item.style.color = 'white';
+                        item.querySelector('span:last-child').style.color = 'white';
+                    } else {
+                        item.style.backgroundColor = '';
+                        item.style.color = '';
+                        item.querySelector('span:last-child').style.color = '#333';
+                    }
+                });
+                
+                // 滚动到选中项
+                if (currentMentionIndex >= 0) {
+                    const selectedItem = items[currentMentionIndex];
+                    if (selectedItem) {
+                        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                    }
+                }
+            }
+            
+            // 选择提及项
+            function selectMention(user) {
+                const value = textarea.value;
+                const textBeforeAt = value.substring(0, mentionStartPos);
+                const textAfterCursor = value.substring(textarea.selectionStart);
+                const mentionText = `@${user.name} `;
+                
+                // 替换 @ 及其后的文本
+                textarea.value = textBeforeAt + mentionText + textAfterCursor;
+                
+                // 设置光标位置
+                const newCursorPos = textBeforeAt.length + mentionText.length;
+                textarea.setSelectionRange(newCursorPos, newCursorPos);
+                
+                // 聚焦并隐藏面板
+                textarea.focus();
+                hideMentionPanel();
+            }
+            
+            // 点击外部关闭面板
+            document.addEventListener('click', function(e) {
+                if (!textarea.contains(e.target) && !mentionPanel.contains(e.target)) {
+                    hideMentionPanel();
                 }
             });
         })();

@@ -96,6 +96,7 @@ function Business({
   const startY = useRef(0);
   const { selector, addTag, delTag } = dealDom(document.body);
   const onUpdateList = useRef<Function[]>([]);
+  const { setSelectTags } = useGeneratedCodeStore((selector) => selector);
 
   const updateSelection = (
     left: number,
@@ -131,6 +132,8 @@ function Business({
 
     if (allElements.length) {
       addTag();
+
+      const list: { tag: string; color: string }[] = []
 
       let container = document.getElementById(containerId);
       if (!container) {
@@ -231,11 +234,17 @@ function Business({
 
             container.appendChild(overlay);
             container.appendChild(label);
+            list.push({
+              tag: element.getAttribute(aria_browseract_tag) || '',
+              color: baseColor,
+            });
           } catch (error) {
             console.error(error);
           }
         }
       }
+
+      setSelectTags(list);
     }
   };
 
@@ -285,6 +294,7 @@ function Business({
     container?.remove();
     onUpdateList.current.length = 0;
     delTag();
+    setSelectTags([]);
   };
   const onKeydown = (e: KeyboardEvent) => {
     if (e.ctrlKey && !isSelecting.current) {

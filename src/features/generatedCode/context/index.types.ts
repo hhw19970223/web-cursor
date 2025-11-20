@@ -15,4 +15,7 @@ export type GeneratedCodeStore = {
 
   loading: boolean;
   setLoading: (loading: boolean) => void;
+
+  selectTags: { tag: string; color: string }[];
+  setSelectTags: (tags: { tag: string; color: string }[]) => void;
 }
