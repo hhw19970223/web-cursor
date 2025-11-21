@@ -15,6 +15,7 @@ import {
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import {
+  ImageShow,
   PromptInput,
   PromptInputAttachment,
   PromptInputAttachments,
@@ -39,15 +40,18 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
-import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
+// import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
 import type { ToolUIPart } from "ai";
 import { ImageIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useCallback, useState } from "react";
 import { useGlobalComponentsStore } from "@/stores/global-components";
-import { Button } from "flowbite-react";
+// import { Button } from "flowbite-react";
 import { useGeneratedCodeStore } from "./context";
 import { aria_browseract_tag } from "@/utils/dom";
+import { v4 } from "uuid";
+import { fileToUint8Array } from "@/utils/file";
+import { cn } from "@/utils/cn";
 
 type MessageType = {
   key: string;
@@ -56,6 +60,15 @@ type MessageType = {
   versions: {
     id: string;
     content: string;
+    files?: {
+      data: Uint8Array;
+      type: string;
+      filename: string;
+      dimension?: {
+        height: number;
+        width: number;
+      };
+    }[];
   }[];
   reasoning?: {
     content: string;
@@ -266,21 +279,18 @@ const mockResponses = [
 
 export const Chat = () => {
   const [text, setText] = useState<string>("");
+  const [bubbleId] = useState(v4());
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
   const [messages, setMessages] = useState<MessageType[]>(initialMessages);
-  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
-    null
-  );
 
   const { showToast } = useGlobalComponentsStore();
-  const { selectTags } = useGeneratedCodeStore(selector => selector);
+  const { selectTags } = useGeneratedCodeStore((selector) => selector);
 
   const streamResponse = useCallback(
     async (messageId: string, content: string) => {
       setStatus("streaming");
-      setStreamingMessageId(messageId);
 
       const words = content.split(" ");
       let currentContent = "";
@@ -308,20 +318,20 @@ export const Chat = () => {
       }
 
       setStatus("ready");
-      setStreamingMessageId(null);
     },
     []
   );
 
   const addUserMessage = useCallback(
-    (content: string) => {
+    ({ newText, images }: any) => {
       const userMessage: MessageType = {
         key: `user-${Date.now()}`,
         from: "user",
         versions: [
           {
             id: `user-${Date.now()}`,
-            content,
+            content: newText,
+            files: images
           },
         ],
       };
@@ -351,7 +361,9 @@ export const Chat = () => {
     [streamResponse]
   );
 
-  const handleSubmit = (message: PromptInputMessage) => {
+  const handleSubmit = async (message: PromptInputMessage) => {
+    if (!text.trim() || status === "streaming") return;
+
     const hasText = Boolean(message.text);
     const hasAttachments = Boolean(message.files?.length);
 
@@ -361,22 +373,42 @@ export const Chat = () => {
 
     const newText = message.text.replace(/@\d+/g, (match) => {
       const num = Number(match.slice(1)); // 取数字
-      const flag = selectTags.some(info => info.tag === num + '');
+      const flag = selectTags.some((info) => info.tag === num + "");
       return flag ? `属性${aria_browseract_tag}的值为${num}的元素` : match;
     });
 
     console.log(newText);
 
+    const composerId = v4();
+    const requestId = v4();
+
     setStatus("submitted");
 
+    const images: any[] = [];
+
     if (message.files?.length) {
-      showToast(
-        "success",
-        `${message.files.length} file(s) attached to message`
-      );
+      for (const file of message.files) {
+        images.push({
+          // @ts-expect-error file
+          data: await fileToUint8Array(file.file),
+          uuid: v4(),
+          // @ts-expect-error dimension
+          dimension: file.dimension,
+          // @ts-expect-error type
+          type: file.file?.type,
+          // @ts-expect-error name
+          filename: file.file?.name
+        });
+      }
     }
 
-    addUserMessage(message.text || "Sent with attachments");
+    const richText =
+      '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"请用html+内联样式，百分百帮我复刻这个落地页","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}';
+
+    addUserMessage({
+      newText,
+      images,
+    });
     setText("");
   };
 
@@ -415,6 +447,20 @@ export const Chat = () => {
                           </ReasoningContent>
                         </Reasoning>
                       )}
+                      {version.files?.length ? (
+                        <MessageContent className="group-[.is-user]:bg-none mb-4 max-w-full overflow-hidden">
+                          <div
+                            className={cn(
+                              "flex flex-wrap items-center gap-2 p-3"
+                            )}
+                          >
+                            {version.files.map((file, index) => {
+                              return file?.data ? <ImageShow key={index + ''} data={file.data} type={file.type} filename={file.filename} /> : null;
+                            })}
+                          </div>
+                        </MessageContent>
+                      ) : null}
+
                       <MessageContent>
                         <MessageResponse>{version.content}</MessageResponse>
                       </MessageContent>
@@ -450,7 +496,7 @@ export const Chat = () => {
                   <PromptInputTextarea
                     onChange={(event) => setText(event.target.value)}
                     value={text}
-                    placeholder = "你想做些什么? (@tag 选择选中的元素)"
+                    placeholder="你想做些什么? (@tag 选择选中的元素)"
                   />
                 </PromptInputBody>
                 <PromptInputFooter>

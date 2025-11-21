@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { transportStream } from "../transport";
-import { reqExample } from "./request";
+import { getReqChatExample } from "./request";
 import { _tt } from "../service/common";
 
 export async function GET(request: Request) {
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
             "x-amzn-trace-id": `Root=${xRequestId}`
           };
           
-          const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', new _tt({ request: reqExample }));
+          const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', new _tt({ request: getReqChatExample() }));
           
           // 检查是否在等待响应时已经被取消
           if (request.signal.aborted) {

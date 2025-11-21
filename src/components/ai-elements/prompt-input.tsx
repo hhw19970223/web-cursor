@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/utils/cn";
+import { getImageSizeFromFile } from "@/utils/file";
 import type { ChatStatus, FileUIPart } from "ai";
 import {
   CornerDownLeftIcon,
@@ -69,6 +70,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { v4 } from "uuid";
 
 // ============================================================================
 // Provider Context & Types
@@ -156,21 +158,38 @@ export function PromptInputProvider({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const openRef = useRef<() => void>(() => {});
 
-  const add = useCallback((files: File[] | FileList) => {
+  const add = useCallback(async (files: File[] | FileList) => {
     const incoming = Array.from(files);
     if (incoming.length === 0) {
       return;
     }
 
+    for (const file of incoming) {
+      const isImage = file.type.startsWith("image/");
+      if (isImage) {
+        try {
+          // @ts-expect-error dimension
+          file.dimension = await getImageSizeFromFile(file);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
     setAttachements((prev) =>
       prev.concat(
-        incoming.map((file) => ({
-          id: nanoid(),
-          type: "file" as const,
-          url: URL.createObjectURL(file),
-          mediaType: file.type,
-          filename: file.name,
-        }))
+        incoming.map((file) => {
+          return {
+            id: nanoid(),
+            type: "file" as const,
+            url: URL.createObjectURL(file),
+            mediaType: file.type,
+            filename: file.name,
+            // @ts-expect-error dimension
+            dimension: file.dimension,
+            file: file,
+          };
+        })
       )
     );
   }, []);
@@ -288,7 +307,7 @@ export function PromptInputAttachment({
       <HoverCardTrigger asChild>
         <div
           className={cn(
-            "group relative flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+            "group relative overflow-hidden flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
             className
           )}
           key={data.id}
@@ -325,7 +344,7 @@ export function PromptInputAttachment({
             </Button>
           </div>
 
-          <span className="flex-1 truncate">{attachmentLabel}</span>
+          <span className="flex-1 truncate" title={attachmentLabel}>{attachmentLabel}</span>
         </div>
       </HoverCardTrigger>
       <PromptInputHoverCardContent className="w-auto p-2">
@@ -341,18 +360,79 @@ export function PromptInputAttachment({
               />
             </div>
           )}
-          <div className="flex items-center gap-2.5">
-            <div className="min-w-0 flex-1 space-y-1 px-0.5">
-              <h4 className="truncate font-semibold text-sm leading-none">
-                {filename || (isImage ? "Image" : "Attachment")}
-              </h4>
-              {data.mediaType && (
-                <p className="truncate font-mono text-muted-foreground text-xs">
-                  {data.mediaType}
-                </p>
+        </div>
+      </PromptInputHoverCardContent>
+    </PromptInputHoverCard>
+  );
+}
+
+export function ImageShow({
+  data,
+  key,
+  type,
+  filename,
+  className,
+}: { key: string, data: Uint8Array, className?: string, type: string, filename: string }) {
+  const mediaType =
+    type  ?.startsWith("image/") ? "image" : "file";
+  const isImage = mediaType === "image";
+
+  const attachmentLabel = filename || (isImage ? "Image" : "Attachment");
+
+  const url = useMemo(() => {
+    return URL.createObjectURL(new Blob([data], { type }));
+  }, [data]);
+
+  useEffect(() => {
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [url]);
+
+  return (
+    <PromptInputHoverCard>
+      <HoverCardTrigger asChild>
+        <div
+          className={cn(
+            "group relative overflow-hidden flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+            className
+          )}
+          key={key}
+        >
+          <div className="relative size-5 shrink-0 overflow-hidden flex">
+            <div className="absolute inset-0 flex size-5 items-center justify-center overflow-hidden rounded bg-background transition-opacity">
+              {isImage ? (
+                <img
+                  alt={filename || "attachment"}
+                  className="size-5 object-cover"
+                  height={20}
+                  src={url}
+                  width={20}
+                />
+              ) : (
+                <div className="flex size-5 items-center justify-center text-muted-foreground">
+                  <PaperclipIcon className="size-3" />
+                </div>
               )}
             </div>
           </div>
+
+          <span className="flex-1 truncate" title={attachmentLabel}>{attachmentLabel}</span>
+        </div>
+      </HoverCardTrigger>
+      <PromptInputHoverCardContent className="w-auto p-2">
+        <div className="w-auto space-y-3">
+          {isImage && (
+            <div className="flex max-h-96 w-96 items-center justify-center overflow-hidden rounded-md border">
+              <img
+                alt={filename || "attachment preview"}
+                className="max-h-full max-w-full object-contain"
+                height={384}
+                src={url}
+                width={448}
+              />
+            </div>
+          )}
         </div>
       </PromptInputHoverCardContent>
     </PromptInputHoverCard>
@@ -379,7 +459,7 @@ export function PromptInputAttachments({
 
   return (
     <div
-      className={cn("flex flex-wrap items-center gap-2 p-3", className)}
+      className={cn("flex flex-wrap items-center gap-2 p-3 overflow-hidden", className)}
       {...props}
     >
       {attachments.files.map((file) => (
@@ -515,7 +595,7 @@ export const PromptInput = ({
         });
         return;
       }
-
+      console.log("file21");
       setItems((prev) => {
         const capacity =
           typeof maxFiles === "number"
@@ -529,7 +609,9 @@ export const PromptInput = ({
             message: "Too many files. Some were not added.",
           });
         }
-        const next: (FileUIPart & { id: string })[] = [];
+        const next: (FileUIPart & {
+          id: string;
+        })[] = [];
         for (const file of capped) {
           next.push({
             id: nanoid(),
@@ -1014,7 +1096,10 @@ export const PromptInputSubmit = ({
   return (
     <InputGroupButton
       aria-label="Submit"
-      className={cn(className, 'disabled:bg-black/2 disabled:cursor-not-allowed')}
+      className={cn(
+        className,
+        "disabled:bg-black/2 disabled:cursor-not-allowed"
+      )}
       size={size}
       type="submit"
       variant={variant}
