@@ -52,6 +52,8 @@ import { aria_browseract_tag } from "@/utils/dom";
 import { v4 } from "uuid";
 import { fileToUint8Array } from "@/utils/file";
 import { cn } from "@/utils/cn";
+import { useLoginStore } from "@/stores/login";
+import { traceparent } from "@/utils/cursor";
 
 type MessageType = {
   key: string;
@@ -287,6 +289,7 @@ export const Chat = () => {
 
   const { showToast } = useGlobalComponentsStore();
   const { selectTags } = useGeneratedCodeStore((selector) => selector);
+  const { loginInfo } = useLoginStore();
 
   const streamResponse = useCallback(
     async (messageId: string, content: string) => {
@@ -331,7 +334,7 @@ export const Chat = () => {
           {
             id: `user-${Date.now()}`,
             content: newText,
-            files: images
+            files: images,
           },
         ],
       };
@@ -355,7 +358,42 @@ export const Chat = () => {
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
-        streamResponse(assistantMessageId, randomResponse);
+
+        const composerId = v4();
+        const requestId = v4();
+
+        const richText =
+        '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"请用html+内联样式，百分百帮我复刻这个落地页","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}';
+
+        const params = encodeURIComponent(
+          JSON.stringify({
+            token: loginInfo?.accessToken,
+            traceparent,
+            xRequestId: requestId,
+            bubbleId,
+            composerId,
+            requestId,
+            newText,
+            images,
+            richText: richText,
+          })
+        );
+        const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
+
+        eventSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data?.message?.streamUnifiedChatResponse) {
+            console.log(data.message.streamUnifiedChatResponse);
+            console.warn(data.message.streamUnifiedChatResponse.text);
+          }
+        };
+
+        eventSource.onerror = (err) => {
+          console.error("SSE error:", err);
+          eventSource.close();
+        };
+
+        // streamResponse(assistantMessageId, randomResponse);
       }, 500);
     },
     [streamResponse]
@@ -379,9 +417,6 @@ export const Chat = () => {
 
     console.log(newText);
 
-    const composerId = v4();
-    const requestId = v4();
-
     setStatus("submitted");
 
     const images: any[] = [];
@@ -397,13 +432,10 @@ export const Chat = () => {
           // @ts-expect-error type
           type: file.file?.type,
           // @ts-expect-error name
-          filename: file.file?.name
+          filename: file.file?.name,
         });
       }
     }
-
-    const richText =
-      '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"请用html+内联样式，百分百帮我复刻这个落地页","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}';
 
     addUserMessage({
       newText,
@@ -455,7 +487,14 @@ export const Chat = () => {
                             )}
                           >
                             {version.files.map((file, index) => {
-                              return file?.data ? <ImageShow key={index + ''} data={file.data} type={file.type} filename={file.filename} /> : null;
+                              return file?.data ? (
+                                <ImageShow
+                                  key={index + ""}
+                                  data={file.data}
+                                  type={file.type}
+                                  filename={file.filename}
+                                />
+                              ) : null;
                             })}
                           </div>
                         </MessageContent>

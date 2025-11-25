@@ -16,8 +16,8 @@ import {
 } from "flowbite-react";
 import { v4 } from "uuid";
 import { useGlobalComponentsStore } from "@/stores/global-components";
+import { traceparent } from "@/utils/cursor";
 
-const traceparent = `00-${X7c()}-${Q7c()}-00`;
 const Profile = () => {
   const { loginInfo, cursorUser, cookie, email } = useLoginStore();
   const interval = useRef<NodeJS.Timeout | null>(null);
@@ -224,18 +224,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-function X7c() {
-  const i = new Uint8Array(16);
-  return (
-    crypto.getRandomValues(i),
-    Array.from(i, (e) => e.toString(16).padStart(2, "0")).join("")
-  );
-}
-function Q7c() {
-  const i = new Uint8Array(8);
-  return (
-    crypto.getRandomValues(i),
-    Array.from(i, (e) => e.toString(16).padStart(2, "0")).join("")
-  );
-}

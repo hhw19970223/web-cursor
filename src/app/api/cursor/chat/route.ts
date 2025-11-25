@@ -6,7 +6,7 @@ import { _tt } from "../service/common";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
-  const { token, traceparent,  xRequestId} = JSON.parse(searchParams.get('data')!);
+  const { token, traceparent,  xRequestId, bubbleId, composerId, requestId, text, images, richText} = JSON.parse(searchParams.get('data')!);
   const encoder = new TextEncoder();
   
   try {
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
             "x-amzn-trace-id": `Root=${xRequestId}`
           };
           
-          const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', new _tt({ request: getReqChatExample() }));
+          const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText) }));
           
           // 检查是否在等待响应时已经被取消
           if (request.signal.aborted) {
