@@ -76,26 +76,6 @@ const Profile = () => {
     }
   }, [cursorUser, loginInfo, cookie]);
 
-  // useEffect(() => {
-  //   window.test = () => {
-  //     const params = encodeURIComponent(JSON.stringify({ token: loginInfo?.accessToken, traceparent, xRequestId: v4() }));
-  //     const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
-
-  //     eventSource.onmessage = (event) => {
-  //       const data = JSON.parse(event.data);
-  //       if (data?.message?.streamUnifiedChatResponse) {
-  //         console.log(data.message.streamUnifiedChatResponse);
-  //         console.warn(data.message.streamUnifiedChatResponse.text);
-  //       }
-  //     };
-
-  //     eventSource.onerror = (err) => {
-  //       console.error('SSE error:', err);
-  //       eventSource.close();
-  //     };
-  //   }
-  // }, [loginInfo]);
-
   const onLogin = async () => {
     const uuid = v4();
     cleanLogin();
