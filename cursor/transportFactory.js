@@ -7,15 +7,19 @@
  */
 
 // 导入必要的模块
-const { createConnectTransport, compressionGzip } = require("@connectrpc/connect-node");
+const {
+  createConnectTransport,
+  compressionGzip,
+} = require("@connectrpc/connect-node");
 const { Cookie, CookieJar } = require("tough-cookie");
 const { Agent } = require("https");
 const dns = require("dns");
 const { randomUUID, randomBytes } = require("crypto");
 const { rootCertificates } = require("tls");
 
-const unique_cpp_user_id = Math.random().toString(36).substring(2, 15) +
-Math.random().toString(36).substring(2, 15);
+const unique_cpp_user_id =
+  Math.random().toString(36).substring(2, 15) +
+  Math.random().toString(36).substring(2, 15);
 
 const Http2Config = {
   UNSPECIFIED: 0,
@@ -23,7 +27,7 @@ const Http2Config = {
   FORCE_ALL_ENABLED: 2,
   FORCE_BIDI_DISABLED: 3,
   FORCE_BIDI_ENABLED: 4,
-}
+};
 
 function isBaseUrlHttp2(e) {
   return (
@@ -34,13 +38,10 @@ function isBaseUrlHttp2(e) {
 }
 
 function replaceBaseUrlWithApi2(e) {
-  return (e = (e = e.replace(
-    "api3.cursor.sh",
+  return (e = (e = e.replace("api3.cursor.sh", "api2.cursor.sh")).replace(
+    "api4.cursor.sh",
     "api2.cursor.sh"
-  )).replace("api4.cursor.sh", "api2.cursor.sh")).replace(
-    /^https:\/\/.*\.gcpp\.cursor\.sh/,
-    "https://api2.cursor.sh"
-  );
+  )).replace(/^https:\/\/.*\.gcpp\.cursor\.sh/, "https://api2.cursor.sh");
 }
 
 function maybeGetSpoofedCppAccessToken(e, t) {
@@ -48,8 +49,7 @@ function maybeGetSpoofedCppAccessToken(e, t) {
   return t?.includes("cursor.sh")
     ? (function (e) {
         let t = e.split("").map((e) => e.charCodeAt(0));
-        for (let e = 0; e < t.length; e++)
-          t[e] = (t[e] + 128 - 1) % 128;
+        for (let e = 0; e < t.length; e++) t[e] = (t[e] + 128 - 1) % 128;
         return String.fromCharCode(...t);
       })(r)
     : e;
@@ -102,11 +102,12 @@ function RYe(s) {
   return s;
 }
 
+const base64Fn = (k) => qd(wrap(k), !1, !0);
+
 const getRequestHeadersExceptAccessToken = function ({
   req: e,
   machineId: n,
   macMachineId: r,
-  base64Fn: s,
   cursorVersion: o,
   privacyMode: i,
   eligibleForSnippetLearning: a,
@@ -116,24 +117,30 @@ const getRequestHeadersExceptAccessToken = function ({
   configVersion: m,
 }) {
   try {
+    const h = Math.floor(Date.now() / 1e6),
+      f = new Uint8Array([
+        (h >> 40) & 255,
+        (h >> 32) & 255,
+        (h >> 24) & 255,
+        (h >> 16) & 255,
+        (h >> 8) & 255,
+        h & 255,
+      ]),
+      p = RYe(f),
+      v = base64Fn(p);
 
-    e.header.set(
-      "x-cursor-checksum",
-      `QlBSS7DCe59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877/36326faa1613d4c93a9db643e2bcd7a67730cf6493a8447e47c21d3643f7c0f5`
-    );
+    e.header.set("x-cursor-checksum", `${v}${n}`);
   } catch (e) {
     console.error(e);
   }
-  e.header.set('x-cursor-client-version', o),
-    void 0 !== m &&
-      "" !== m &&
-      e.header.set("x-cursor-config-version", m),
-    void 0 !== c && e.header.set('x-session-id', c),
+  e.header.set("x-cursor-client-version", o),
+    void 0 !== m && "" !== m && e.header.set("x-cursor-config-version", m),
+    void 0 !== c && e.header.set("x-session-id", c),
     e.header.set(
-      'x-new-onboarding-completed',
+      "x-new-onboarding-completed",
       a && !1 === i ? "true" : "false"
     ),
-    e.header.set('x-ghost-mode', CYe(i)),
+    e.header.set("x-ghost-mode", CYe(i)),
     void 0 !== u && e.header.set("x-client-key", u);
   try {
     const t = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -141,12 +148,11 @@ const getRequestHeadersExceptAccessToken = function ({
   } catch (e) {}
   try {
     l &&
-      (e.header.has("x-request-id") ||
-        e.header.set("x-request-id", l),
+      (e.header.has("x-request-id") || e.header.set("x-request-id", l),
       e.header.has("x-amzn-trace-id") ||
         e.header.set("x-amzn-trace-id", `Root=${l}`));
   } catch (e) {}
-}
+};
 
 /**
  * TransportFactory 类
@@ -174,16 +180,16 @@ class TransportFactory {
     this.cookieJar = new CookieJar();
     this.getAccessToken = getAccessToken;
     this.clientKey = randomBytes(32);
-    
+
     // DNS 顺序缓存，用于维护 DNS 查询结果的顺序
     this.dnsOrderCache = new Map();
-    
+
     // 活跃的 HTTP Agent 集合
     this.activeAgents = new Set();
-    
+
     // 存储的随机值，用于 Cookie 生成
     this.storedRandomness = randomUUID();
-    
+
     // 加载系统证书
     this.loadCertificates();
   }
@@ -194,10 +200,9 @@ class TransportFactory {
    */
   async loadCertificates() {
     try {
-
       // 获取内置根证书
       const builtinCerts = rootCertificates;
-      
+
       // 合并系统证书和内置证书
       this.systemCertificates = [...(builtinCerts || [])];
     } catch (e) {
@@ -216,18 +221,14 @@ class TransportFactory {
    * @returns {Object} 包含 transport、isHttp2 和 usage 的对象
    */
   createTransport(options, cfg) {
-    const {
-      baseUrl,
-      useHttp2,
-      maybeUseCppSpoofToken,
-      overrideAuthToken,
-    } = options;
-    
+    const { baseUrl, useHttp2, maybeUseCppSpoofToken, overrideAuthToken } =
+      options;
+
     // 判断是否应该禁用 HTTP/2
     // 如果服务器强制禁用，或者服务器未强制启用且用户配置中禁用了 HTTP/2
     const shouldDisableHttp2 =
       options.useHttp2FromServerConfig === Http2Config.FORCE_ALL_DISABLED ||
-      options.useHttp2FromServerConfig !== Http2Config.FORCE_ALL_ENABLED
+      options.useHttp2FromServerConfig !== Http2Config.FORCE_ALL_ENABLED;
 
     // 创建 HTTP Agent
     let agent;
@@ -238,70 +239,82 @@ class TransportFactory {
     this.activeAgents.add(agent);
 
     let httpOptions = { agent: agent };
-    
+
     // 确定是否实际使用 HTTP/2
     const willUseHttp2 = useHttp2 && !shouldDisableHttp2;
-    
+
     let processedBaseUrl = baseUrl;
-    
+
     // 如果禁用了 HTTP/2 且基础 URL 是 HTTP/2 的，替换为 API2 URL
     if (shouldDisableHttp2 && isBaseUrlHttp2(baseUrl)) {
       processedBaseUrl = replaceBaseUrlWithApi2(baseUrl);
     }
-    
+
     // 检查是否是本地开发环境（localhost 或 lclhst.build）
     const isLocalhost =
       null !==
         processedBaseUrl.match(/(?:[^\/]+\.)?lclhst\.build(?::\d+)?(?:\/|$)/) ||
-      null !== processedBaseUrl.match(/(?:[^\/]+\.)?localhost(?::\d+)?(?:\/|$)/);
+      null !==
+        processedBaseUrl.match(/(?:[^\/]+\.)?localhost(?::\d+)?(?:\/|$)/);
 
     // 创建拦截器链
-    const interceptors = this.createInterceptors({
-      baseUrl: processedBaseUrl,
-      maybeUseCppSpoofToken,
-      overrideAuthToken,
-    }, this.clientKey.toString("hex"), cfg);
+    const interceptors = this.createInterceptors(
+      {
+        baseUrl: processedBaseUrl,
+        maybeUseCppSpoofToken,
+        overrideAuthToken,
+      },
+      this.clientKey.toString("hex"),
+      cfg
+    );
 
     // 为特定域名配置自定义 DNS 查找（用于 gcpp 和 api4.cursor.sh）
     const dnsLookup =
-      processedBaseUrl.includes("gcpp") || processedBaseUrl.includes("api4.cursor.sh")
+      processedBaseUrl.includes("gcpp") ||
+      processedBaseUrl.includes("api4.cursor.sh")
         ? {
             lookup: (hostname, options, callback) => {
-              dns.lookup(hostname, { ...options, all: true }, (err, addresses, family) => {
-                // 如果返回的是字符串（单个地址），直接返回
-                if (typeof addresses === "string") {
-                  return callback(err, addresses, family);
+              dns.lookup(
+                hostname,
+                { ...options, all: true },
+                (err, addresses, family) => {
+                  // 如果返回的是字符串（单个地址），直接返回
+                  if (typeof addresses === "string") {
+                    return callback(err, addresses, family);
+                  }
+
+                  // 缓存首次查询的 DNS 结果顺序
+                  if (!this.dnsOrderCache.has(hostname)) {
+                    this.dnsOrderCache.set(hostname, addresses);
+                  }
+
+                  // 获取缓存的 DNS 顺序
+                  const cachedOrder = this.dnsOrderCache.get(hostname);
+
+                  // 检查新查询结果是否与缓存结果相同（仅顺序可能不同）
+                  const isSameSet =
+                    addresses.length === cachedOrder.length &&
+                    addresses.every((addr) =>
+                      cachedOrder.some(
+                        (cached) => cached.address === addr.address
+                      )
+                    );
+
+                  // 如果地址相同但顺序可能不同，使用缓存的顺序以保持一致性
+                  callback(err, isSameSet ? cachedOrder : addresses, family);
                 }
-                
-                // 缓存首次查询的 DNS 结果顺序
-                if (!this.dnsOrderCache.has(hostname)) {
-                  this.dnsOrderCache.set(hostname, addresses);
-                }
-                
-                // 获取缓存的 DNS 顺序
-                const cachedOrder = this.dnsOrderCache.get(hostname);
-                
-                // 检查新查询结果是否与缓存结果相同（仅顺序可能不同）
-                const isSameSet =
-                  addresses.length === cachedOrder.length &&
-                  addresses.every((addr) =>
-                    cachedOrder.some((cached) => cached.address === addr.address)
-                  );
-                
-                // 如果地址相同但顺序可能不同，使用缓存的顺序以保持一致性
-                callback(err, isSameSet ? cachedOrder : addresses, family);
-              });
+              );
             },
           }
         : undefined;
 
     // 本地开发环境的 TLS 选项
     const tlsOptions = isLocalhost
-        ? {
-            rejectUnauthorized: false, // 允许自签名证书
-            ALPNProtocols: [willUseHttp2 ? "h2" : "http/1.1"], // ALPN 协议协商
-          }
-        : {};
+      ? {
+          rejectUnauthorized: false, // 允许自签名证书
+          ALPNProtocols: [willUseHttp2 ? "h2" : "http/1.1"], // ALPN 协议协商
+        }
+      : {};
 
     // 传输层基础配置
     const transportConfig = {
@@ -344,32 +357,33 @@ class TransportFactory {
    * @param {Function} options.overrideAuthToken - 覆盖认证令牌的函数
    * @returns {Array} 拦截器数组
    */
-  createInterceptors({
-    baseUrl,
-    maybeUseCppSpoofToken,
-    overrideAuthToken,
-  }, clientKey, cfg) {
+  createInterceptors(
+    { baseUrl, maybeUseCppSpoofToken, overrideAuthToken },
+    clientKey,
+    cfg
+  ) {
     const interceptors = [];
 
     // 拦截器 3: 认证令牌拦截器
     interceptors.push((next) => async (request) => {
-
-      if (cfg['x-request-id']) {
+      if (cfg["x-request-id"]) {
         getRequestHeadersExceptAccessToken({
           req: request,
-          machineId: 'e59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877',
-          macMachineId: '36326faa1613d4c93a9db643e2bcd7a67730cf6493a8447e47c21d3643f7c0f5',
-          base64Fn: (k) => qd(wrap(k), !1, !0),
-          cursorVersion: '1.5.5',
+          machineId:
+            "e59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877",
+          macMachineId:
+            "36326faa1613d4c93a9db643e2bcd7a67730cf6493a8447e47c21d3643f7c0f5",
+          cursorVersion: "1.5.5",
           privacyMode: true,
           eligibleForSnippetLearning: true,
-          sessionId: 'db18da73-e8bb-4513-91c4-c248196848ea',
-          backupRequestId: cfg['x-request-id'],
-          clientKey: clientKey,
-          configVersion: 'b057550d-1277-4726-b190-7ec7450b17a6',
-        })
+          sessionId: "d5a5d891-d978-4635-aee6-c2bb65e50d1a",
+          backupRequestId:
+            "89d0fe27971e7284f9d1f90fe79faba59c85812d5696e75b84b17cf8d763dea0",
+          clientKey:
+            "89d0fe27971e7284f9d1f90fe79faba59c85812d5696e75b84b17cf8d763dea0",
+          configVersion: "341d5c8b-f235-47ee-a859-a9aae4f854ee",
+        });
       }
-      
 
       // 如果提供了覆盖令牌函数，优先使用
       if (overrideAuthToken) {
@@ -382,7 +396,7 @@ class TransportFactory {
 
       // 获取访问令牌
       const accessToken = this.getAccessToken();
-      
+
       // 如果没有令牌，直接继续
       if (accessToken === undefined) {
         return await next(request);
@@ -392,10 +406,7 @@ class TransportFactory {
       if (maybeUseCppSpoofToken) {
         request.header.set(
           "Authorization",
-          `Bearer ${maybeGetSpoofedCppAccessToken(
-            accessToken,
-            baseUrl
-          )}`
+          `Bearer ${maybeGetSpoofedCppAccessToken(accessToken, baseUrl)}`
         );
       } else {
         request.header.set("Authorization", `Bearer ${accessToken}`);
@@ -405,14 +416,12 @@ class TransportFactory {
     });
 
     // 拦截器 4: 请求头拦截器
-    interceptors.push(
-      (next) => async (request) => {
-        // 设置流式传输标志
-        request.header.set("x-cursor-streaming", "true");
+    interceptors.push((next) => async (request) => {
+      // 设置流式传输标志
+      request.header.set("x-cursor-streaming", "true");
 
-        return await next(request);
-      }
-    );
+      return await next(request);
+    });
 
     // 拦截器 5: Cookie 管理拦截器
     interceptors.push((next) => async (request) => {
@@ -421,7 +430,7 @@ class TransportFactory {
       try {
         // 尝试获取现有的 Cookie
         const cookieString = await this.cookieJar.getCookieString(baseUrl);
-        
+
         if (cookieString.length > 0) {
           // 如果有 Cookie，设置到请求头
           request.header.set("Cookie", cookieString);
@@ -432,7 +441,7 @@ class TransportFactory {
             request.url,
             accessToken?.slice(0, 15) ?? this.storedRandomness
           );
-          
+
           // 获取新创建的 Cookie
           const newCookieString = await this.cookieJar.getCookieString(baseUrl);
           request.header.set("Cookie", newCookieString);
@@ -452,9 +461,7 @@ class TransportFactory {
             await this.cookieJar.setCookie(cookie, baseUrl).catch(() => {});
           }
         }
-      } catch (e) {
-
-      }
+      } catch (e) {}
 
       return response;
     });
@@ -492,32 +499,112 @@ class TransportFactory {
     for (const agent of this.activeAgents) {
       agent.destroy();
     }
-    
+
     // 清空集合和缓存
     this.activeAgents.clear();
     this.dnsOrderCache.clear();
   }
 }
 
+var wZ = typeof Buffer < "u", Vre, zre,
+  K = class Xi {
+    static alloc(e) {
+      return wZ ? new Xi(Buffer.allocUnsafe(e)) : new Xi(new Uint8Array(e));
+    }
+    static wrap(e) {
+      return (
+        wZ &&
+          !Buffer.isBuffer(e) &&
+          (e = Buffer.from(e.buffer, e.byteOffset, e.byteLength)),
+        new Xi(e)
+      );
+    }
+    static fromString(e, t) {
+      return !(t?.dontUseNodeBuffer || !1) && wZ
+        ? new Xi(Buffer.from(e))
+        : (Vre || (Vre = new TextEncoder()), new Xi(Vre.encode(e)));
+    }
+    static fromByteArray(e) {
+      const t = Xi.alloc(e.length);
+      for (let n = 0, r = e.length; n < r; n++) t.buffer[n] = e[n];
+      return t;
+    }
+    static concat(e, t) {
+      if (typeof t > "u") {
+        t = 0;
+        for (let a = 0, o = e.length; a < o; a++) t += e[a].byteLength;
+      }
+      const n = Xi.alloc(t);
+      let r = 0;
+      for (let a = 0, o = e.length; a < o; a++) {
+        const c = e[a];
+        n.set(c, r), (r += c.byteLength);
+      }
+      return n;
+    }
+    constructor(e) {
+      (this.buffer = e), (this.byteLength = this.buffer.byteLength);
+    }
+    clone() {
+      const e = Xi.alloc(this.byteLength);
+      return e.set(this), e;
+    }
+    toString() {
+      return wZ
+        ? this.buffer.toString()
+        : (zre || (zre = new TextDecoder()), zre.decode(this.buffer));
+    }
+    slice(e, t) {
+      return new Xi(this.buffer.subarray(e, t));
+    }
+    set(e, t) {
+      if (e instanceof Xi) this.buffer.set(e.buffer, t);
+      else if (e instanceof Uint8Array) this.buffer.set(e, t);
+      else if (e instanceof ArrayBuffer) this.buffer.set(new Uint8Array(e), t);
+      else if (ArrayBuffer.isView(e))
+        this.buffer.set(
+          new Uint8Array(e.buffer, e.byteOffset, e.byteLength),
+          t
+        );
+      else throw new Error("Unknown argument 'array'");
+    }
+    readUInt32BE(e) {
+      return yZ(this.buffer, e);
+    }
+    writeUInt32BE(e, t) {
+      SZ(this.buffer, e, t);
+    }
+    readUInt32LE(e) {
+      return _Be(this.buffer, e);
+    }
+    writeUInt32LE(e, t) {
+      kBe(this.buffer, e, t);
+    }
+    readUInt8(e) {
+      return EBe(this.buffer, e);
+    }
+    writeUInt8(e, t) {
+      CBe(this.buffer, e, t);
+    }
+    indexOf(e, t = 0) {
+      return Upe(this.buffer, e instanceof Xi ? e.buffer : e, t);
+    }
+    equals(e) {
+      return this === e
+        ? !0
+        : this.byteLength !== e.byteLength
+        ? !1
+        : this.buffer.every((t, n) => t === e.buffer[n]);
+    }
+  };
+
 /**
  * 将 Uint8Array 或其他类型化数组包装成 Buffer
  * 替代 proto3.util.wrap 方法
  */
-function wrap(data){
-  // 如果已经是 Buffer，直接返回
-  if (Buffer.isBuffer(data)) {
-    return data;
-  }
-  
-  // 如果是 Uint8Array 或其他 TypedArray，转换为 Buffer
-  if (ArrayBuffer.isView(data)) {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-  }
-  
-  // 兜底：尝试直接转换
-  return Buffer.from(data);
+function wrap(e) {
+  return new K(Buffer.from(e.buffer, e.byteOffset, e.byteLength));
 }
 
 // 导出 TransportFactory 类
 module.exports = { TransportFactory, wrap };
-

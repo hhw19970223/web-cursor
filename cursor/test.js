@@ -20,6 +20,6 @@ const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'stream
 Promise.resolve()
 .then(async () => {
   for await (const G of res.message) {
-    console.log(G.data.text);
+    console.log(G);
   }
 })

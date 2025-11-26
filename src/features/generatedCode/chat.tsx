@@ -362,8 +362,7 @@ export const Chat = () => {
         const composerId = v4();
         const requestId = v4();
 
-        const richText =
-        '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"请用html+内联样式，百分百帮我复刻这个落地页","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}';
+        const richText = '';
 
         const params = encodeURIComponent(
           JSON.stringify({

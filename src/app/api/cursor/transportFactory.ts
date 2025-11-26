@@ -117,10 +117,19 @@ const getRequestHeadersExceptAccessToken = function ({
 }) {
   try {
 
-    e.header.set(
-      "x-cursor-checksum",
-      `Q_z-5wXCe59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877`
-    );
+    const h = Math.floor(Date.now() / 1e6),
+    f = new Uint8Array([
+      (h >> 40) & 255,
+      (h >> 32) & 255,
+      (h >> 24) & 255,
+      (h >> 16) & 255,
+      (h >> 8) & 255,
+      h & 255,
+    ]),
+    p = RYe(f),
+    v = s(p);
+
+    e.header.set("x-cursor-checksum", `${v}${n}`);
   } catch (e) {
     console.error(e);
   }
@@ -499,23 +508,105 @@ class TransportFactory {
   }
 }
 
+
+let wZ = typeof Buffer < "u", Vre, zre,
+  K = class Xi {
+    static alloc(e) {
+      return wZ ? new Xi(Buffer.allocUnsafe(e)) : new Xi(new Uint8Array(e));
+    }
+    static wrap(e) {
+      return (
+        wZ &&
+          !Buffer.isBuffer(e) &&
+          (e = Buffer.from(e.buffer, e.byteOffset, e.byteLength)),
+        new Xi(e)
+      );
+    }
+    static fromString(e, t) {
+      return !(t?.dontUseNodeBuffer || !1) && wZ
+        ? new Xi(Buffer.from(e))
+        : (Vre || (Vre = new TextEncoder()), new Xi(Vre.encode(e)));
+    }
+    static fromByteArray(e) {
+      const t = Xi.alloc(e.length);
+      for (let n = 0, r = e.length; n < r; n++) t.buffer[n] = e[n];
+      return t;
+    }
+    static concat(e, t) {
+      if (typeof t > "u") {
+        t = 0;
+        for (let a = 0, o = e.length; a < o; a++) t += e[a].byteLength;
+      }
+      const n = Xi.alloc(t);
+      let r = 0;
+      for (let a = 0, o = e.length; a < o; a++) {
+        const c = e[a];
+        n.set(c, r), (r += c.byteLength);
+      }
+      return n;
+    }
+    constructor(e) {
+      (this.buffer = e), (this.byteLength = this.buffer.byteLength);
+    }
+    clone() {
+      const e = Xi.alloc(this.byteLength);
+      return e.set(this), e;
+    }
+    toString() {
+      return wZ
+        ? this.buffer.toString()
+        : (zre || (zre = new TextDecoder()), zre.decode(this.buffer));
+    }
+    slice(e, t) {
+      return new Xi(this.buffer.subarray(e, t));
+    }
+    set(e, t) {
+      if (e instanceof Xi) this.buffer.set(e.buffer, t);
+      else if (e instanceof Uint8Array) this.buffer.set(e, t);
+      else if (e instanceof ArrayBuffer) this.buffer.set(new Uint8Array(e), t);
+      else if (ArrayBuffer.isView(e))
+        this.buffer.set(
+          new Uint8Array(e.buffer, e.byteOffset, e.byteLength),
+          t
+        );
+      else throw new Error("Unknown argument 'array'");
+    }
+    readUInt32BE(e) {
+      return yZ(this.buffer, e);
+    }
+    writeUInt32BE(e, t) {
+      SZ(this.buffer, e, t);
+    }
+    readUInt32LE(e) {
+      return _Be(this.buffer, e);
+    }
+    writeUInt32LE(e, t) {
+      kBe(this.buffer, e, t);
+    }
+    readUInt8(e) {
+      return EBe(this.buffer, e);
+    }
+    writeUInt8(e, t) {
+      CBe(this.buffer, e, t);
+    }
+    indexOf(e, t = 0) {
+      return Upe(this.buffer, e instanceof Xi ? e.buffer : e, t);
+    }
+    equals(e) {
+      return this === e
+        ? !0
+        : this.byteLength !== e.byteLength
+        ? !1
+        : this.buffer.every((t, n) => t === e.buffer[n]);
+    }
+  };
+
 /**
  * 将 Uint8Array 或其他类型化数组包装成 Buffer
  * 替代 proto3.util.wrap 方法
  */
-function wrap(data: Uint8Array | Buffer): Buffer {
-  // 如果已经是 Buffer，直接返回
-  if (Buffer.isBuffer(data)) {
-    return data;
-  }
-  
-  // 如果是 Uint8Array 或其他 TypedArray，转换为 Buffer
-  if (ArrayBuffer.isView(data)) {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-  }
-  
-  // 兜底：尝试直接转换
-  return Buffer.from(data as any);
+function wrap(e: Uint8Array | Buffer): Buffer {
+  return new K(Buffer.from(e.buffer, e.byteOffset, e.byteLength));
 }
 
 // 导出 TransportFactory 类
