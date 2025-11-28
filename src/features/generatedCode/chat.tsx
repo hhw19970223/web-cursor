@@ -92,7 +92,7 @@ export const Chat = () => {
 
   const { selectTags } = useGeneratedCodeStore((selector) => selector);
   const { loginInfo } = useLoginStore();
-  const { setCode, setNewCode } = useGeneratedCodeStore(selector => selector);
+  const { setCode, setNewCode, code: html } = useGeneratedCodeStore(selector => selector);
 
   const addUserMessage = useCallback(({ newText, images }: any) => {
     const userMessage: MessageType = {
@@ -150,6 +150,7 @@ export const Chat = () => {
             images,
             richText: "",
             uuid: composerId,
+            code: html
           }),
         });
 
