@@ -16,7 +16,6 @@ export async function fileToUint8Array(file: File) {
   return new Uint8Array(arrayBuffer);
 }
 
-
 export function isBase64Image(base64: string) {
   return /^data:image\/(png|jpg|jpeg|gif|webp|svg\+xml|bmp|ico);base64,/i.test(base64);
 }

@@ -68,7 +68,7 @@ export async function transportUnary(token: string, cfg: any, serviceName: strin
 }
 
 //cfg = traceparent = '00-858acc5d8a4cf7adfc9a5495de2b30b1-82d011ebff8f3c63-00'  x-amzn-trace-id = 'Root=a7bf72d2-f52e-4f15-93f0-1881b4d925af' x-request-id = 'a7bf72d2-f52e-4f15-93f0-1881b4d925af'
-export async function transportStream(token: string, cfg: any, serviceName: string, methodName: string, request?: any) {
+export async function transportStream(token: string, cfg: any, serviceName: string, methodName: string, y) {
 
   const transportFactory = new TransportFactory(() => {
     return token;
@@ -94,10 +94,6 @@ export async function transportStream(token: string, cfg: any, serviceName: stri
   }
 
   const abortController = new AbortController();
-
-  const y = async function* () {
-    yield request;
-  };
   
   try {
     // 执行 unary 调用并等待结果

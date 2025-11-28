@@ -42,12 +42,10 @@ import {
 } from "@/components/ai-elements/sources";
 import type { ToolUIPart } from "ai";
 import { ImageIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useCallback, useState } from "react";
 import { useGeneratedCodeStore } from "./context";
 import { aria_browseract_tag } from "@/utils/dom";
 import { v4 } from "uuid";
-import { fileToUint8Array } from "@/utils/file";
 import { cn } from "@/utils/cn";
 import { useLoginStore } from "@/stores/login";
 import { traceparent } from "@/utils/cursor";
@@ -61,7 +59,7 @@ type MessageType = {
     id: string;
     content: string;
     files?: {
-      data: Uint8Array;
+      data: string;
       type: string;
       filename: string;
       dimension?: {
@@ -94,69 +92,115 @@ export const Chat = () => {
 
   const { selectTags } = useGeneratedCodeStore((selector) => selector);
   const { loginInfo } = useLoginStore();
+  const { setCode, setNewCode } = useGeneratedCodeStore(selector => selector);
 
-  const addUserMessage = useCallback(
-    ({ newText, images }: any) => {
-      const userMessage: MessageType = {
-        key: `user-${Date.now()}`,
-        from: "user",
+  const addUserMessage = useCallback(({ newText, images }: any) => {
+    const userMessage: MessageType = {
+      key: `user-${Date.now()}`,
+      from: "user",
+      versions: [
+        {
+          id: `user-${Date.now()}`,
+          content: newText,
+          files: images,
+        },
+      ],
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    setTimeout(async () => {
+      const assistantMessageId = `assistant-${Date.now()}`;
+
+      const assistantMessage: MessageType = {
+        key: `assistant-${Date.now()}`,
+        from: "assistant",
         versions: [
           {
-            id: `user-${Date.now()}`,
-            content: newText,
-            files: images,
+            id: assistantMessageId,
+            content: "",
           },
         ],
       };
 
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
 
-      setTimeout(() => {
-        const assistantMessageId = `assistant-${Date.now()}`;
+      const composerId = v4();
+      const requestId = v4();
 
-        const assistantMessage: MessageType = {
-          key: `assistant-${Date.now()}`,
-          from: "assistant",
-          versions: [
-            {
-              id: assistantMessageId,
-              content: "",
-            },
-          ],
-        };
+      const params = encodeURIComponent(
+        JSON.stringify({
+          uuid: composerId,
+        })
+      );
 
-        setMessages((prev) => [...prev, assistantMessage]);
+      setStatus("streaming");
 
-        const composerId = v4();
-        const requestId = v4();
-
-        const params = encodeURIComponent(
-          JSON.stringify({
+      try {
+        await fetch("/api/cursor/chat", {
+          method: "POST",
+          body: JSON.stringify({
+            text: newText,
             token: loginInfo?.accessToken,
             traceparent,
             xRequestId: requestId,
             bubbleId,
             composerId,
             requestId,
-            newText,
             images,
-            richText: '',
-          })
-        );
+            richText: "",
+            uuid: composerId,
+          }),
+        });
+
         const eventSource = new EventSource(`/api/cursor/chat?data=${params}`);
+
+        let code = "";
 
         eventSource.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data?.message?.streamUnifiedChatResponse) {
-            console.log(data.message.streamUnifiedChatResponse);
-            console.warn(data.message.streamUnifiedChatResponse.text);
+            const streamUnifiedChatResponse = data.message.streamUnifiedChatResponse;
+            console.log(data.message);
+            console.warn(streamUnifiedChatResponse.text);
 
-            if (data.message.streamUnifiedChatResponse.text != null) {
-              assistantMessage.versions[0].content += data.message.streamUnifiedChatResponse.text;
+            if (streamUnifiedChatResponse.text != null) {
+              assistantMessage.versions[0].content +=
+                streamUnifiedChatResponse.text;
               setMessages((prev) => [...prev]);
             }
-           
+
+            if (streamUnifiedChatResponse.toolCall) {
+              const toolCall = streamUnifiedChatResponse.toolCall;
+              if (toolCall.rawArgs) {
+                try {
+                  const args = JSON.parse(toolCall.rawArgs);
+                  const contents = args.contents;
+                  if (contents) {
+                    if (!code) {
+                      code = contents;
+                      setNewCode(code);
+                    } else {
+                      code += contents;
+                      setCode(code);
+                    }
+                  }
+                  
+                } catch (e) {
+                  console.error(e);
+                }
+              }
+            }
+
+            if (streamUnifiedChatResponse.parallelToolCallsComplete && code) {
+              onClose();
+            }
           }
+        };
+
+        const onClose = () => {
+          eventSource?.close();
+          setStatus("ready");
         };
 
         eventSource.onerror = (err) => {
@@ -164,12 +208,11 @@ export const Chat = () => {
           eventSource.close();
           setStatus("ready");
         };
-
-        setStatus("streaming");
-      }, 500);
-    },
-    []
-  );
+      } catch (e) {
+        setStatus("ready");
+      }
+    }, 500);
+  }, []);
 
   const handleSubmit = async (message: PromptInputMessage) => {
     if (!text.trim() || status === "streaming") return;
@@ -196,8 +239,7 @@ export const Chat = () => {
     if (message.files?.length) {
       for (const file of message.files) {
         images.push({
-          // @ts-expect-error file
-          data: await fileToUint8Array(file.file),
+          data: file.url,
           uuid: v4(),
           // @ts-expect-error dimension
           dimension: file.dimension,
@@ -259,14 +301,19 @@ export const Chat = () => {
                             )}
                           >
                             {version.files.map((file, index) => {
-                              return file?.data ? (
-                                <ImageShow
-                                  key={index + ""}
-                                  data={file.data}
-                                  type={file.type}
-                                  filename={file.filename}
-                                />
-                              ) : null;
+                              return (
+                                <div>
+                                  {file?.data ? (
+                                    <div key={index + ""}>
+                                      <ImageShow
+                                        data={file.data}
+                                        type={file.type}
+                                        filename={file.filename}
+                                      />
+                                    </div>
+                                  ) : null}
+                                </div>
+                              );
                             })}
                           </div>
                         </MessageContent>
@@ -288,7 +335,11 @@ export const Chat = () => {
               )}
             </MessageBranch>
           ))}
-          { status === 'streaming' ? <div className="mb-4"><LineLoading /></div> : null }
+          {status === "streaming" ? (
+            <div className="mb-4">
+              <LineLoading />
+            </div>
+          ) : null}
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>

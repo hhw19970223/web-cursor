@@ -1,122 +1,64 @@
-import { pc } from "../service/common";
+import { hXe, lKe, pc, st, xu } from "../service/common";
 
-
-export const getReqChatExample = (bubbleId: string, composerId: string, requestId: string, text: string, images: any[], richText: string) => {
-
+export const getReqChatExample = (
+  bubbleId: string,
+  composerId: string,
+  requestId: string,
+  text: string,
+  images: any[],
+  richText: string
+) => {
   const req = {
     conversation: [
-      {
+      new st({
         text,
         type: 1,
-        attachedCodeChunks: [
-        ],
-        codebaseContextChunks: [
-        ],
-        commits: [
-        ],
-        pullRequests: [
-        ],
-        gitDiffs: [
-        ],
-        assistantSuggestedDiffs: [
-        ],
-        interpreterResults: [
-        ],
+        attachedCodeChunks: [],
+        codebaseContextChunks: [],
+        commits: [],
+        pullRequests: [],
+        gitDiffs: [],
+        assistantSuggestedDiffs: [],
+        interpreterResults: [],
         images,
-        attachedFolders: [
-        ],
-        approximateLintErrors: [
-        ],
+        attachedFolders: [],
+        approximateLintErrors: [],
         bubbleId,
-        attachedFoldersNew: [
-        ],
-        lints: [
-        ],
-        userResponsesToSuggestedCodeBlocks: [
-        ],
-        relevantFiles: [
-        ],
-        toolResults: [
-        ],
-        notepads: [
-        ],
-        capabilities: [
-        ],
-        editTrailContexts: [
-        ],
-        suggestedCodeBlocks: [
-        ],
-        diffsForCompressingFiles: [
-        ],
-        multiFileLinterErrors: [
-        ],
-        diffHistories: [
-        ],
-        recentlyViewedFiles: [
-        ],
-        recentLocationsHistory: [
-        ],
+        attachedFoldersNew: [],
+        lints: [],
+        userResponsesToSuggestedCodeBlocks: [],
+        relevantFiles: [],
+        toolResults: [],
+        notepads: [],
+        capabilities: [],
+        editTrailContexts: [],
+        suggestedCodeBlocks: [],
+        diffsForCompressingFiles: [],
+        multiFileLinterErrors: [],
+        diffHistories: [],
+        recentlyViewedFiles: [],
+        recentLocationsHistory: [],
         isAgentic: true,
-        fileDiffTrajectories: [
-        ],
+        fileDiffTrajectories: [],
         existedSubsequentTerminalCommand: false,
         existedPreviousTerminalCommand: false,
-        docsReferences: [
-        ],
-        webReferences: [
-        ],
-        aiWebSearchResults: [
-        ],
-        attachedFoldersListDirResults: [
-        ],
-        humanChanges: [
-        ],
+        docsReferences: [],
+        webReferences: [],
+        aiWebSearchResults: [],
+        attachedFoldersListDirResults: [],
+        humanChanges: [],
         attachedHumanChanges: false,
-        summarizedComposers: [
-        ],
-        cursorRules: [
-        ],
-        contextPieces: [
-        ],
-        allThinkingBlocks: [
-        ],
-        diffsSinceLastApply: [
-        ],
-        deletedFiles: [
-        ],
+        summarizedComposers: [],
+        cursorRules: [],
+        contextPieces: [],
+        allThinkingBlocks: [],
+        diffsSinceLastApply: [],
+        deletedFiles: [],
         supportedTools: [
-          1,
-          3,
-          41,
-          5,
-          6,
-          7,
-          38,
-          8,
-          9,
-          11,
-          12,
-          15,
-          18,
-          19,
-          23,
-          24,
-          25,
-          26,
-          27,
-          28,
-          29,
-          30,
-          31,
-          32,
-          34,
-          35,
-          39,
-          40,
-          42,
+          1, 3, 41, 5, 6, 7, 38, 8, 9, 11, 12, 15, 18, 19, 23, 24, 25, 26, 27,
+          28, 29, 30, 31, 32, 34, 35, 39, 40, 42,
         ],
-        consoleLogs: [
-        ],
+        consoleLogs: [],
         knowledgeItems: [
           {
             title: "Migrated User Rules",
@@ -125,24 +67,18 @@ export const getReqChatExample = (bubbleId: string, composerId: string, requestI
             isGenerated: false,
           },
         ],
-        uiElementPicked: [
-        ],
-        documentationSelections: [
-        ],
-        externalLinks: [
-        ],
-        projectLayouts: [
-        ],
-        capabilityContexts: [
-        ],
-        todos: [
-        ],
+        uiElementPicked: [],
+        documentationSelections: [],
+        externalLinks: [],
+        projectLayouts: [],
+        capabilityContexts: [],
+        todos: [],
         requestId,
         unifiedMode: 2,
         editToolSupportsSearchAndReplace: true,
         richText,
         useWeb: false,
-      },
+      }),
     ],
     fullConversationHeadersOnly: [
       {
@@ -150,20 +86,13 @@ export const getReqChatExample = (bubbleId: string, composerId: string, requestI
         type: 1,
       },
     ],
-    documentationIdentifiers: [
-    ],
-    externalLinks: [
-    ],
-    diffsForCompressingFiles: [
-    ],
-    multiFileLinterErrors: [
-    ],
-    fileDiffHistories: [
-    ],
-    quotes: [
-    ],
-    additionalRankedContext: [
-    ],
+    documentationIdentifiers: [],
+    externalLinks: [],
+    diffsForCompressingFiles: [],
+    multiFileLinterErrors: [],
+    fileDiffHistories: [],
+    quotes: [],
+    additionalRankedContext: [],
     isChat: false,
     conversationId: composerId,
     replyingToRequestId: "",
@@ -172,35 +101,8 @@ export const getReqChatExample = (bubbleId: string, composerId: string, requestI
     repoQueryAuthToken: "",
     isAgentic: true,
     supportedTools: [
-      1,
-      3,
-      41,
-      5,
-      6,
-      7,
-      38,
-      8,
-      9,
-      11,
-      12,
-      15,
-      18,
-      19,
-      23,
-      24,
-      25,
-      26,
-      27,
-      28,
-      29,
-      30,
-      31,
-      32,
-      34,
-      35,
-      39,
-      40,
-      42,
+      1, 3, 41, 5, 6, 7, 38, 8, 9, 11, 12, 15, 18, 19, 23, 24, 25, 26, 27, 28,
+      29, 30, 31, 32, 34, 35, 39, 40, 42,
     ],
     enableYoloMode: true,
     yoloPrompt: "",
@@ -208,34 +110,31 @@ export const getReqChatExample = (bubbleId: string, composerId: string, requestI
     mcpTools: [
       {
         name: "nx_docs",
-        description: "Returns a list of documentation sections that could be relevant to the user query. IMPORTANT: ALWAYS USE THIS IF YOU ARE ANSWERING QUESTIONS ABOUT NX. NEVER ASSUME KNOWLEDGE ABOUT NX BECAUSE IT WILL PROBABLY BE OUTDATED. Use it to learn about nx, its configuration and options instead of assuming knowledge about it.",
-        parameters: "{\"type\":\"object\",\"properties\":{\"userQuery\":{\"type\":\"string\",\"description\":\"The user query to get docs for. You can pass the original user query verbatim or summarize it.\"}},\"required\":[\"userQuery\"],\"additionalProperties\":false,\"$schema\":\"http://json-schema.org/draft-07/schema#\"}",
+        description:
+          "Returns a list of documentation sections that could be relevant to the user query. IMPORTANT: ALWAYS USE THIS IF YOU ARE ANSWERING QUESTIONS ABOUT NX. NEVER ASSUME KNOWLEDGE ABOUT NX BECAUSE IT WILL PROBABLY BE OUTDATED. Use it to learn about nx, its configuration and options instead of assuming knowledge about it.",
+        parameters:
+          '{"type":"object","properties":{"userQuery":{"type":"string","description":"The user query to get docs for. You can pass the original user query verbatim or summarize it."}},"required":["userQuery"],"additionalProperties":false,"$schema":"http://json-schema.org/draft-07/schema#"}',
         serverName: "extension-nx-mcp",
       },
       {
         name: "nx_available_plugins",
-        description: "Returns a list of available Nx plugins from the core team as well as local workspace Nx plugins.",
-        parameters: "{\"type\":\"object\",\"properties\":{\"random_string\":{\"type\":\"string\",\"description\":\"Dummy parameter for no-parameter tools\"}},\"required\":[\"random_string\"]}",
+        description:
+          "Returns a list of available Nx plugins from the core team as well as local workspace Nx plugins.",
+        parameters:
+          '{"type":"object","properties":{"random_string":{"type":"string","description":"Dummy parameter for no-parameter tools"}},"required":["random_string"]}',
         serverName: "extension-nx-mcp",
       },
     ],
     isHeadless: false,
     isBackgroundComposer: false,
-    toolsRequiringAcceptedReturn: [
-      18,
-      7,
-      38,
-      24,
-    ],
-    projectLayouts: [
-    ],
+    toolsRequiringAcceptedReturn: [18, 7, 38, 24],
+    projectLayouts: [],
     supportsGitIndex: true,
     forceIsNotDev: false,
     allowLongFileScan: true,
     explicitContext: {
       context: "Always respond in Chinese-simplified",
-      rules: [
-      ],
+      rules: [],
     },
     canHandleFilenamesAfterLanguageIds: true,
     modelDetails: {
@@ -275,14 +174,52 @@ export const getReqChatExample = (bubbleId: string, composerId: string, requestI
     indexingPhaseIfUnindexed: "none",
     supportsMermaidDiagrams: true,
     disableEditFileTimeout: false,
-  }
+  };
 
   return {
     case: "streamUnifiedChatRequest",
     value: new pc(req),
-  }
+  };
 };
 
+export const getReqToolImgExample = (
+  tool: string,
+  toolCallId: string
+) => {
+  const value = {
+    result: new lKe({
+      fileWasCreated: false,
+      linterErrors: [
+      ],
+      sentBackLinterErrors: false,
+      shouldAutoFixLints: false,
+      resultForModel: "",
+    }),
+    tool,
+    toolCallId,
+  };
 
+  return {
+    case: "clientSideToolV2Result",
+    value: new xu(value),
+  };
+};
 
+export const getReqToolWebExample = (tool: string, toolCallId: string) => {
+  const value = {
+    result: {
+      case: "webSearchResult",
+      value: new hXe({
+        references: [],
+        isFinal: true,
+      }),
+    },
+    tool,
+    toolCallId,
+  };
 
+  return {
+    case: "clientSideToolV2Result",
+    value: new xu(value),
+  };
+};

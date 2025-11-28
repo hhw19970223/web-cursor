@@ -368,26 +368,25 @@ export function PromptInputAttachment({
 
 export function ImageShow({
   data,
-  key,
   type,
   filename,
   className,
-}: { key: string, data: Uint8Array, className?: string, type: string, filename: string }) {
+}: { data: string, className?: string, type: string, filename: string }) {
   const mediaType =
     type  ?.startsWith("image/") ? "image" : "file";
   const isImage = mediaType === "image";
 
   const attachmentLabel = filename || (isImage ? "Image" : "Attachment");
 
-  const url = useMemo(() => {
-    return URL.createObjectURL(new Blob([data], { type }));
-  }, [data]);
+  // const url = useMemo(() => {
+  //   return URL.createObjectURL(new Blob([data], { type }));
+  // }, [data]);
 
-  useEffect(() => {
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [url]);
+  // useEffect(() => {
+  //   return () => {
+  //     URL.revokeObjectURL(url);
+  //   };
+  // }, [url]);
 
   return (
     <PromptInputHoverCard>
@@ -397,7 +396,6 @@ export function ImageShow({
             "group relative overflow-hidden flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
             className
           )}
-          key={key}
         >
           <div className="relative size-5 shrink-0 overflow-hidden flex">
             <div className="absolute inset-0 flex size-5 items-center justify-center overflow-hidden rounded bg-background transition-opacity">
@@ -406,7 +404,7 @@ export function ImageShow({
                   alt={filename || "attachment"}
                   className="size-5 object-cover"
                   height={20}
-                  src={url}
+                  src={data}
                   width={20}
                 />
               ) : (
@@ -428,7 +426,7 @@ export function ImageShow({
                 alt={filename || "attachment preview"}
                 className="max-h-full max-w-full object-contain"
                 height={384}
-                src={url}
+                src={data}
                 width={448}
               />
             </div>
@@ -740,6 +738,9 @@ export const PromptInput = ({
     if (event.currentTarget.files) {
       add(event.currentTarget.files);
     }
+
+    // @ts-expect-error Reset the input value
+    event.target.value = null;
   };
 
   const convertBlobUrlToDataUrl = async (url: string): Promise<string> => {

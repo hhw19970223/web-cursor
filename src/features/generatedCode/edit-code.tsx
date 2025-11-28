@@ -9,7 +9,7 @@ export function EditCode() {
   );
 
   return (
-    <div className="h-full w-full overflow-hidden relative">
+    <div className="h-full w-full overflow-hidden relative max-w-full max-h-full">
       {showDiff ? (
         <>
           <MonacoDiffEditor
@@ -17,7 +17,7 @@ export function EditCode() {
             originalCode={oldCode}
             modifiedCode={code}
           />
-          <div className="absolute bottom-6 right-6 flex gap-2 items-center">
+          <div className="absolute flex gap-2 items-center" style={{ bottom: "24px", right: "24px" }}>
             <Button
               color="yellow"
               className="!rounded-md hover:opacity-80"

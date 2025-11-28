@@ -85608,3 +85608,40 @@ export var  Jkt = class Ej extends u {
       return i.util.equals(nY, e, t);
     }
   }
+
+
+
+export const tools = [
+  { no: 0, name: "CLIENT_SIDE_TOOL_V2_UNSPECIFIED" },
+  { no: 1, name: "CLIENT_SIDE_TOOL_V2_READ_SEMSEARCH_FILES" },
+  { no: 3, name: "CLIENT_SIDE_TOOL_V2_RIPGREP_SEARCH" },
+  { no: 5, name: "CLIENT_SIDE_TOOL_V2_READ_FILE" },
+  { no: 6, name: "CLIENT_SIDE_TOOL_V2_LIST_DIR" },
+  { no: 7, name: "CLIENT_SIDE_TOOL_V2_EDIT_FILE" },
+  { no: 8, name: "CLIENT_SIDE_TOOL_V2_FILE_SEARCH" },
+  { no: 9, name: "CLIENT_SIDE_TOOL_V2_SEMANTIC_SEARCH_FULL" },
+  { no: 11, name: "CLIENT_SIDE_TOOL_V2_DELETE_FILE" },
+  { no: 12, name: "CLIENT_SIDE_TOOL_V2_REAPPLY" },
+  { no: 15, name: "CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2" },
+  { no: 16, name: "CLIENT_SIDE_TOOL_V2_FETCH_RULES" },
+  { no: 18, name: "CLIENT_SIDE_TOOL_V2_WEB_SEARCH" },
+  { no: 19, name: "CLIENT_SIDE_TOOL_V2_MCP" },
+  { no: 23, name: "CLIENT_SIDE_TOOL_V2_SEARCH_SYMBOLS" },
+  { no: 24, name: "CLIENT_SIDE_TOOL_V2_BACKGROUND_COMPOSER_FOLLOWUP" },
+  { no: 25, name: "CLIENT_SIDE_TOOL_V2_KNOWLEDGE_BASE" },
+  { no: 26, name: "CLIENT_SIDE_TOOL_V2_FETCH_PULL_REQUEST" },
+  { no: 27, name: "CLIENT_SIDE_TOOL_V2_DEEP_SEARCH" },
+  { no: 28, name: "CLIENT_SIDE_TOOL_V2_CREATE_DIAGRAM" },
+  { no: 29, name: "CLIENT_SIDE_TOOL_V2_FIX_LINTS" },
+  { no: 30, name: "CLIENT_SIDE_TOOL_V2_READ_LINTS" },
+  { no: 31, name: "CLIENT_SIDE_TOOL_V2_GO_TO_DEFINITION" },
+  { no: 32, name: "CLIENT_SIDE_TOOL_V2_TASK" },
+  { no: 33, name: "CLIENT_SIDE_TOOL_V2_AWAIT_TASK" },
+  { no: 34, name: "CLIENT_SIDE_TOOL_V2_TODO_READ" },
+  { no: 35, name: "CLIENT_SIDE_TOOL_V2_TODO_WRITE" },
+  { no: 38, name: "CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2" },
+  { no: 39, name: "CLIENT_SIDE_TOOL_V2_LIST_DIR_V2" },
+  { no: 40, name: "CLIENT_SIDE_TOOL_V2_READ_FILE_V2" },
+  { no: 41, name: "CLIENT_SIDE_TOOL_V2_RIPGREP_RAW_SEARCH" },
+  { no: 42, name: "CLIENT_SIDE_TOOL_V2_GLOB_FILE_SEARCH" },
+]  
