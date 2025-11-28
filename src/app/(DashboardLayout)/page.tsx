@@ -1,14 +1,12 @@
 'use client'
 
 import { useLoginStore } from "@/stores/login";
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { ColorButton } from "@/components/color-button";
-import { Input } from "@/components/ui/input";
 
 const page = () => {
   const { loginInfo } = useLoginStore();
-  const [inputValue, setInputValue] = useState("");
 
   const list = [
     {
