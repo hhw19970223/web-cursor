@@ -1,4 +1,107 @@
-import { hXe, lKe, pc, st, xu } from "../service/common";
+import { gp, hXe, lKe, pc, st, xu } from "../service/common";
+
+export const composerMap: any = {};
+
+export const getConversation = (
+  bubbleId: string,
+  requestId: string,
+  text: string,
+  images: any[],
+  richText: string,
+
+  type: 1 | 2,
+  code: string,
+  serverBubbleId = ''
+) => {
+  return new st({
+    text,
+    type: type,
+    attachedCodeChunks: code
+      ? [
+          new gp({
+            relativeWorkspacePath: "\\index.html",
+            startLineNumber: 1,
+            lines: code?.split("\n"),
+            languageIdentifier: "",
+            intent: 1,
+            isOnlyIncludedFromFolder: false,
+          }),
+        ]
+      : [],
+    codebaseContextChunks: [],
+    commits: [],
+    pullRequests: [],
+    gitDiffs: [],
+    assistantSuggestedDiffs: [],
+    interpreterResults: [],
+    images,
+    attachedFolders: [],
+    approximateLintErrors: [],
+    bubbleId,
+    attachedFoldersNew: [],
+    lints: [],
+    userResponsesToSuggestedCodeBlocks: [],
+    relevantFiles: [],
+    toolResults: [],
+    notepads: [],
+    capabilities: [],
+    editTrailContexts: [],
+    suggestedCodeBlocks: [],
+    diffsForCompressingFiles: [],
+    multiFileLinterErrors: [],
+    diffHistories: [],
+    recentlyViewedFiles: [],
+    recentLocationsHistory: [],
+    isAgentic: true,
+    fileDiffTrajectories: [],
+    existedSubsequentTerminalCommand: false,
+    existedPreviousTerminalCommand: false,
+    docsReferences: [],
+    webReferences: [],
+    aiWebSearchResults: [],
+    attachedFoldersListDirResults: [],
+    humanChanges: [],
+    attachedHumanChanges: false,
+    summarizedComposers: [],
+    cursorRules: [],
+    contextPieces: [],
+    allThinkingBlocks: [],
+    diffsSinceLastApply: [],
+    deletedFiles: [],
+    supportedTools: [
+      1, 3, 41, 5, 6, 7, 38, 8, 9, 11, 12, 15, 18, 19, 23, 24, 25, 26, 27, 28,
+      29, 30, 31, 32, 34, 35, 39, 40, 42,
+    ],
+    consoleLogs: [],
+    knowledgeItems: [
+      {
+        title: "Migrated User Rules",
+        knowledge: "Always respond in Chinese-simplified",
+        knowledgeId: "341218",
+        isGenerated: false,
+      },
+    ],
+    uiElementPicked: [],
+    documentationSelections: [],
+    externalLinks: [],
+    projectLayouts: [],
+    capabilityContexts: [],
+    todos: [],
+    requestId,
+    unifiedMode: 2,
+    editToolSupportsSearchAndReplace: true,
+    richText,
+    useWeb: false,
+    serverBubbleId,
+  });
+};
+
+export const addConversation = (composerId: string, data: any) => {
+  if (!composerMap[composerId]) {
+    composerMap[composerId] = [];
+  }
+  composerMap[composerId].push(data);
+};
 
 export const getReqChatExample = (
   bubbleId: string,
@@ -6,14 +109,29 @@ export const getReqChatExample = (
   requestId: string,
   text: string,
   images: any[],
-  richText: string
+  richText: string,
+  code: string
 ) => {
+  const oldConversation = composerMap[composerId] || [];
+
   const req = {
     conversation: [
+      ...oldConversation,
       new st({
         text,
         type: 1,
-        attachedCodeChunks: [],
+        attachedCodeChunks: code
+          ? [
+              new gp({
+                relativeWorkspacePath: "\\index.html",
+                startLineNumber: 1,
+                lines: code?.split("\n"),
+                languageIdentifier: "",
+                intent: 1,
+                isOnlyIncludedFromFolder: false,
+              }),
+            ]
+          : [],
         codebaseContextChunks: [],
         commits: [],
         pullRequests: [],
@@ -81,6 +199,7 @@ export const getReqChatExample = (
       }),
     ],
     fullConversationHeadersOnly: [
+      ...oldConversation.map(({bubbleId, type, serverBubbleId}: any) => ({ bubbleId, type, serverBubbleId })),
       {
         bubbleId,
         type: 1,
@@ -182,15 +301,11 @@ export const getReqChatExample = (
   };
 };
 
-export const getReqToolImgExample = (
-  tool: string,
-  toolCallId: string
-) => {
+export const getReqToolImgExample = (tool: string, toolCallId: string) => {
   const value = {
     result: new lKe({
       fileWasCreated: false,
-      linterErrors: [
-      ],
+      linterErrors: [],
       sentBackLinterErrors: false,
       shouldAutoFixLints: false,
       resultForModel: "",

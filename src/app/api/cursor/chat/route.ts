@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { transportStream } from "../transport";
-import { getReqChatExample, getReqToolImgExample, getReqToolWebExample } from "./request";
+import { addConversation, composerMap, getConversation, getReqChatExample, getReqToolImgExample, getReqToolWebExample } from "./request";
 import { _tt, k7e, tools, Ur } from "../service/common";
 import { v4 } from "uuid";
 
 const dataMap: any = {};
+
+export async function DELETE(request: Request) { 
+  const { composerId } = await request.json();
+  delete composerMap[composerId];
+  return NextResponse.json('', { status: 200 });
+}
 
 export async function POST(request: Request) {
   const { uuid, ...req } = await request.json();
@@ -23,7 +29,7 @@ export async function GET(request: Request) {
   
   try {
 
-    const { token, traceparent,  xRequestId, bubbleId, composerId, requestId, text, images, richText} = dataMap[uuid];
+    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code } = dataMap[uuid];
 
     if (images?.length) {
       for (let i = 0; i < images.length; i++) {
@@ -74,7 +80,7 @@ export async function GET(request: Request) {
           };
 
           const queue = new AsyncQueue<any>();
-          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText) }));  
+          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code) }));  
 
           const y = async function* () {
             try {
@@ -120,10 +126,16 @@ export async function GET(request: Request) {
                     queue.push(new _tt({ request: getReqToolImgExample(partialToolCall.tool, partialToolCall.toolCallId) }));  
                   }
               }
+
+              if (chunk.response?.value?.text) {
+                addConversation(composerId, getConversation(v4(), '', chunk.response.value.text, [], '', 2, '',  chunk.response.value.serverBubbleId || ''))
+              }
             }
           }
           
           const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', y);
+
+          addConversation(composerId, getConversation(bubbleId, requestId, text, images, richText, 1, code))
 
           // 检查是否在等待响应时已经被取消
           if (request.signal.aborted) {

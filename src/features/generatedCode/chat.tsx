@@ -42,7 +42,7 @@ import {
 } from "@/components/ai-elements/sources";
 import type { ToolUIPart } from "ai";
 import { ImageIcon } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGeneratedCodeStore } from "./context";
 import { aria_browseract_tag } from "@/utils/dom";
 import { v4 } from "uuid";
@@ -50,6 +50,7 @@ import { cn } from "@/utils/cn";
 import { useLoginStore } from "@/stores/login";
 import { traceparent } from "@/utils/cursor";
 import LineLoading from "@/components/loading";
+import { useEdges } from "@xyflow/react";
 
 type MessageType = {
   key: string;
@@ -84,7 +85,7 @@ type MessageType = {
 
 export const Chat = () => {
   const [text, setText] = useState<string>("");
-  const [bubbleId] = useState(v4());
+  const [composerId] = useState(v4());
   const [status, setStatus] = useState<
     "submitted" | "streaming" | "ready" | "error"
   >("ready");
@@ -125,7 +126,7 @@ export const Chat = () => {
 
       setMessages((prev) => [...prev, assistantMessage]);
 
-      const composerId = v4();
+      const bubbleId = v4();
       const requestId = v4();
 
       const params = encodeURIComponent(
@@ -257,6 +258,17 @@ export const Chat = () => {
     });
     setText("");
   };
+
+  useEffect(() => {
+    return () => {
+      fetch("/api/cursor/chat", {
+        method: "DELETE",
+        body: JSON.stringify({
+          composerId
+        }),
+      })
+    }
+  }, [])
 
   return (
     <div className="relative flex size-full flex-col divide-y overflow-hidden">
