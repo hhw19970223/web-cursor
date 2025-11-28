@@ -10,6 +10,21 @@ export function base64ToUint8Array(base64: string) {
   return bytes;
 }
 
+export function base64ToUint8ArrayInNode(base64String: string) {
+  // 如果 base64 字符串包含 data URL 前缀（如 "data:image/png;base64,"），需要先移除
+  const base64Data = base64String.includes(',') 
+    ? base64String.split(',')[1] 
+    : base64String;
+  
+  // 将 base64 字符串转换为 Buffer
+  const buffer = Buffer.from(base64Data, 'base64');
+  
+  // 将 Buffer 转换为 Uint8Array
+  const uint8Array = new Uint8Array(buffer);
+  
+  return uint8Array;
+}
+
 export async function fileToUint8Array(file: File) {
   // file.arrayBuffer() 是浏览器原生方法
   const arrayBuffer = await file.arrayBuffer();

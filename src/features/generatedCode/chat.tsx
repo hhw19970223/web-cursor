@@ -50,7 +50,6 @@ import { cn } from "@/utils/cn";
 import { useLoginStore } from "@/stores/login";
 import { traceparent } from "@/utils/cursor";
 import LineLoading from "@/components/loading";
-import { useEdges } from "@xyflow/react";
 
 type MessageType = {
   key: string;

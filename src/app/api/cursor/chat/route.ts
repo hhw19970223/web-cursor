@@ -3,6 +3,7 @@ import { transportStream } from "../transport";
 import { addConversation, composerMap, getConversation, getReqChatExample, getReqToolImgExample, getReqToolWebExample } from "./request";
 import { _tt, k7e, tools, Ur } from "../service/common";
 import { v4 } from "uuid";
+import { base64ToUint8ArrayInNode } from "@/utils/file";
 
 const dataMap: any = {};
 
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
         if (image.dimension) {
           image.dimension = new k7e(image.dimension);
         }
-        const uint8 = Uint8Array.from(Buffer.from(image.data, 'base64'));
+        const uint8 = base64ToUint8ArrayInNode(image.data);
         image.data = uint8;
         images[i] = new Ur(image);
       }
@@ -223,3 +224,4 @@ class AsyncQueue<T> {
     };
   }
 }
+
