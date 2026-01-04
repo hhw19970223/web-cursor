@@ -369,7 +369,7 @@ class TransportFactory {
           machineId: 'e59a056f8338ee7614d4ef994285eedca55f551513d3423e91dea7bd06198877',
           macMachineId: '36326faa1613d4c93a9db643e2bcd7a67730cf6493a8447e47c21d3643f7c0f5',
           base64Fn: (k) => qd(wrap(k), !1, !0),
-          cursorVersion: '1.5.5',
+          cursorVersion: '2.2.17',
           privacyMode: true,
           eligibleForSnippetLearning: true,
           sessionId: 'db18da73-e8bb-4513-91c4-c248196848ea',
