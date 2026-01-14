@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   
   try {
 
-    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code, ts } = dataMap[uuid];
+    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code, ts, json } = dataMap[uuid];
 
     if (images?.length) {
       for (let i = 0; i < images.length; i++) {
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
           };
 
           const queue = new AsyncQueue<any>();
-          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code, ts) }));  
+          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code, ts, json) }));  
 
           const y = async function* () {
             try {
@@ -129,14 +129,14 @@ export async function GET(request: Request) {
               }
 
               if (chunk.response?.value?.text) {
-                addConversation(composerId, getConversation(v4(), '', chunk.response.value.text, [], '', 2, '',  chunk.response.value.serverBubbleId || ''))
+                addConversation(composerId, getConversation(v4(), '', chunk.response.value.text, [], '', 2, '',  chunk.response.value.serverBubbleId || '', '', ''))
               }
             }
           }
           
           const res = await transportStream(token, cfg, 'aiserver.v1.ChatService', 'streamUnifiedChatWithTools', y);
 
-          addConversation(composerId, getConversation(bubbleId, requestId, text, images, richText, 1, code))
+          addConversation(composerId, getConversation(bubbleId, requestId, text, images, richText, 1, code, '', ts, json))
 
           // 检查是否在等待响应时已经被取消
           if (request.signal.aborted) {

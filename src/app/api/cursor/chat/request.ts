@@ -12,22 +12,38 @@ export const getConversation = (
   type: 1 | 2,
   code: string,
   serverBubbleId = '',
+  ts: string,
+  json: string,
 ) => {
   return new st({
     text,
     type: type,
-    attachedCodeChunks: code
-      ? [
-          new gp({
-            relativeWorkspacePath: "\\index.html",
-            startLineNumber: 1,
-            lines: code?.split("\n"),
-            languageIdentifier: "",
-            intent: 1,
-            isOnlyIncludedFromFolder: false,
-          }),
-        ]
-      : [],
+    attachedCodeChunks: [
+      new gp({
+        relativeWorkspacePath: "index.html",
+        startLineNumber: 1,
+        lines: code?.split("\n"),
+        languageIdentifier: "",
+        intent: 1,
+        isOnlyIncludedFromFolder: false,
+      }),
+      new gp({
+        relativeWorkspacePath: "index.ts",
+        startLineNumber: 1,
+        lines: ts?.split("\n"),
+        languageIdentifier: "",
+        intent: 1,
+        isOnlyIncludedFromFolder: false,
+      }),
+      new gp({
+        relativeWorkspacePath: "index.json",
+        startLineNumber: 1,
+        lines: json?.split("\n"),
+        languageIdentifier: "",
+        intent: 1,
+        isOnlyIncludedFromFolder: false,
+      }),
+    ],
     codebaseContextChunks: [],
     commits: [],
     pullRequests: [],
@@ -111,7 +127,8 @@ export const getReqChatExample = (
   images: any[],
   richText: string,
   code: string,
-  ts: string
+  ts: string,
+  json: string,
 ) => {
   const oldConversation = composerMap[composerId] || [];
 
@@ -123,6 +140,14 @@ export const getReqChatExample = (
         type: 1,
         attachedCodeChunks: [
           new gp({
+            relativeWorkspacePath: "index.html",
+            startLineNumber: 1,
+            lines: code?.split("\n") || '',
+            languageIdentifier: "",
+            intent: 1,
+            isOnlyIncludedFromFolder: false,
+          }),
+          new gp({
             relativeWorkspacePath: 'index.ts',
             startLineNumber: 1,
             lines: ts?.split("\n") || '',
@@ -131,13 +156,13 @@ export const getReqChatExample = (
             isOnlyIncludedFromFolder: false,
           }),
           new gp({
-            relativeWorkspacePath: "index.html",
+            relativeWorkspacePath: 'index.json',
             startLineNumber: 1,
-            lines: code?.split("\n") || '',
+            lines: json?.split("\n") || '',
             languageIdentifier: "",
             intent: 1,
             isOnlyIncludedFromFolder: false,
-          })
+          }),
         ],
         codebaseContextChunks: [],
         commits: [],

@@ -41,7 +41,7 @@ import {
   SourcesTrigger,
 } from "@/components/ai-elements/sources";
 import type { ToolUIPart } from "ai";
-import { ImageIcon, ChevronDown } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useGeneratedChartStore } from "./context";
 import { v4 } from "uuid";
@@ -118,14 +118,14 @@ export const Chat = () => {
   const { loginInfo } = useLoginStore();
   const { setCode, setNewCode, code: html } = useGeneratedChartStore(selector => selector);
 
-  const addUserMessage = useCallback(({ newText, images, selectedChartType, prompt, messages, ts }: any) => {
+  const addUserMessage = useCallback(({ newText, images, selectedChartType, prompt, messages, json }: any) => {
 
     let promptText = ``;
     if (!messages || messages.length === 0) {
       promptText += `你好，你是一位专业的数据分析师和可视化图表生成助手。
 
 你的主要任务是：
-1. 仔细分析用户提供的数据结构（已解析为 JavaScript 对象格式）
+1. 仔细分析用户提供的数据结构
 2. 总结数据的关键特征、趋势和洞察
 3. 根据数据特点和用户需求，生成高质量的交互式图表
 
@@ -133,11 +133,10 @@ export const Chat = () => {
     }  
 
     // 如果有表格数据，添加到提示文本中
-    if (ts) {
-      promptText += `## @index.ts 已解析的数据结构（JavaScript 格式）：
+    if (json) {
+      promptText += `## @index.json
 
 ### 数据结构说明：
-- **变量名**：使用原始文件名作为常量名称（特殊字符已转换为下划线）
 - **数据格式**：对象结构，键为 Excel 工作表名称（如 "Sheet1"、"Sheet2" 等）
 - **数据内容**：每个工作表对应一个数组，数组中每个元素是一个对象，代表表格的一行数据
 - **字段名称**：对象的键来自 Excel 表格的列标题，值为对应的单元格数据
@@ -146,11 +145,11 @@ export const Chat = () => {
 `;
     }
 
-    promptText += ts ? `请根据以下要求生成一个${selectedChartType}：
+    promptText += json ? `请根据以下要求生成一个${selectedChartType}：
 
 ## 数据分析要求
 - 深入分析提供的数据结构，识别数据类型、字段含义和数据关系
-- 数据已经是 JavaScript 对象格式，可以直接在代码中使用
+- 数据已经是 JSON 结构的数据，请一次性读取
 - 总结数据的关键统计信息（如总数、平均值、最大/最小值、趋势等）
 - 提取有价值的数据洞察和发现
 
@@ -241,7 +240,7 @@ ${prompt}
             richText: "",
             uuid: composerId,
             code:  html,
-            ts
+            json
           }),
         });
 
@@ -326,7 +325,7 @@ ${prompt}
 
     setStatus("submitted");
 
-    let ts = ''
+    let json = ''
 
     const images: any[] = [];
 
@@ -339,14 +338,6 @@ ${prompt}
         const isExcel = file.name.match(/\.(xlsx|xls|csv)$/i);
         
         if (isExcel) {
-          images.push({
-            data: info.url,
-            uuid: v4(),
-            // @ts-expect-error dimension
-            dimension: info.dimension,
-            type: file?.type,
-            filename: file?.name,
-          });
           try {
             // 动态导入 xlsx 库
             const XLSX = await import('xlsx');
@@ -356,7 +347,7 @@ ${prompt}
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
             
             // 获取文件名（去除扩展名并生成合法的变量名）
-            const fileName = file.name.replace(/\.(xlsx|xls|csv)$/i, '');
+            // const fileName = file.name.replace(/\.(xlsx|xls|csv)$/i, '');
             
             // 解析所有 sheet
             const sheetsData: Record<string, any[]> = {};
@@ -367,9 +358,19 @@ ${prompt}
               sheetsData[sheetName] = jsonData;
             });
             
-            // 生成代码字符串
-            const dataString = `const ${fileName} = ${JSON.stringify(sheetsData, null, 2)};\n\n`;
-            ts += dataString;
+
+            images.push({
+              data: info.url,
+              uuid: v4(),
+              // @ts-expect-error dimension
+              dimension: info.dimension,
+              type: file?.type,
+              filename: file?.name,
+            });
+
+            json = JSON.stringify(sheetsData);
+
+            break;
           } catch (error) {
             console.error('解析表格文件失败:', error);
             showToast('error', `解析文件 ${file.name} 失败`);
@@ -381,14 +382,14 @@ ${prompt}
 
     console.log(images);
 
-    if (!(hasText || ts)) {
+    if (!(hasText || json)) {
       showToast('error', '请上传表格格式的文件');
       return;
     }
 
     // 将选中的图表类型添加到用户消息中
     const chartTypeLabel = CHART_TYPES.find(t => t.value === selectedChartType)?.label || "";
-    const enhancedText = chartTypeLabel && ts ? `请生成一个${chartTypeLabel}：${message.text}` : message.text;
+    const enhancedText = chartTypeLabel && json ? `请生成一个${chartTypeLabel}：${message.text}` : message.text;
 
     addUserMessage({
       newText: enhancedText,
@@ -396,7 +397,7 @@ ${prompt}
       images,
       selectedChartType,
       messages,
-      ts: ts
+      json
     });
     setText("");
   };
@@ -477,9 +478,9 @@ ${prompt}
                           >
                             {version.files.map((file, index) => {
                               return (
-                                <div key={index + ""}>
+                                <div key={index + ""} className="flex overflow-hidden">
                                   {file?.data ? (
-                                    <div>
+                                    <div className="flex overflow-hidden">
                                       <ImageShow
                                         data={file.data}
                                         type={file.type}
