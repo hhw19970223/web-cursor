@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   
   try {
 
-    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code } = dataMap[uuid];
+    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code, ts } = dataMap[uuid];
 
     if (images?.length) {
       for (let i = 0; i < images.length; i++) {
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
           };
 
           const queue = new AsyncQueue<any>();
-          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code) }));  
+          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code, ts) }));  
 
           const y = async function* () {
             try {
@@ -154,14 +154,24 @@ export async function GET(request: Request) {
           if (!isClosed) {
             isClosed = true;
             try {
-              // 发送错误信息给客户端
+              // @ts-expect-error 1111
+              const errorDetails = err?.details?.[0]?.debug?.details;
+              // 发送 SSE 格式的错误消息
               const errorMessage = `data: ${JSON.stringify({ 
-                error: err instanceof Error ? err.message : 'Unknown error' 
+                error: true, 
+                message: errorDetails || 'Stream error occurred',
+                details: err
               })}\n\n`;
               controller.enqueue(encoder.encode(errorMessage));
+              // 发送 SSE error 事件，触发前端 onerror
+              const sseError = `event: error\ndata: ${JSON.stringify({ 
+                error: errorDetails || 'Stream error occurred' 
+              })}\n\n`;
+              controller.enqueue(encoder.encode(sseError));
               controller.close();
             } catch (e) {
-              // 如果无法发送错误，使用 error 方法
+              // 如果无法发送错误，使用 error 方法强制触发前端错误
+              console.error('Failed to send error message:', e);
               controller.error(err);
             }
           }

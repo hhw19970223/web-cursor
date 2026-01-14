@@ -10,9 +10,9 @@ const page = () => {
 
   const list = [
     {
-      title: "前端代码生成",
+      title: "图表智能生成",
       type: "1",
-      link: "/generated-code",
+      link: "/generated-chart",
     },
   ];
 

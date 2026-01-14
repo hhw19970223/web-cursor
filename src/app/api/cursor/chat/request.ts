@@ -11,7 +11,7 @@ export const getConversation = (
 
   type: 1 | 2,
   code: string,
-  serverBubbleId = ''
+  serverBubbleId = '',
 ) => {
   return new st({
     text,
@@ -110,7 +110,8 @@ export const getReqChatExample = (
   text: string,
   images: any[],
   richText: string,
-  code: string
+  code: string,
+  ts: string
 ) => {
   const oldConversation = composerMap[composerId] || [];
 
@@ -120,18 +121,24 @@ export const getReqChatExample = (
       new st({
         text,
         type: 1,
-        attachedCodeChunks: code
-          ? [
-              new gp({
-                relativeWorkspacePath: "\\index.html",
-                startLineNumber: 1,
-                lines: code?.split("\n"),
-                languageIdentifier: "",
-                intent: 1,
-                isOnlyIncludedFromFolder: false,
-              }),
-            ]
-          : [],
+        attachedCodeChunks: [
+          new gp({
+            relativeWorkspacePath: 'index.ts',
+            startLineNumber: 1,
+            lines: ts?.split("\n") || '',
+            languageIdentifier: "",
+            intent: 1,
+            isOnlyIncludedFromFolder: false,
+          }),
+          new gp({
+            relativeWorkspacePath: "index.html",
+            startLineNumber: 1,
+            lines: code?.split("\n") || '',
+            languageIdentifier: "",
+            intent: 1,
+            isOnlyIncludedFromFolder: false,
+          })
+        ],
         codebaseContextChunks: [],
         commits: [],
         pullRequests: [],
@@ -257,7 +264,7 @@ export const getReqChatExample = (
     },
     canHandleFilenamesAfterLanguageIds: true,
     modelDetails: {
-      modelName: "default",
+      modelName: "claude-4.5-sonnet-thinking",//"default",
       azureState: {
         apiKey: "",
         baseUrl: "",
