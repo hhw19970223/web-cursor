@@ -156,6 +156,8 @@ export async function GET(request: Request) {
             try {
               // @ts-expect-error 1111
               const errorDetails = err?.details?.[0]?.debug?.details;
+              console.error('errorDetails --------------->');
+              console.error(errorDetails);
               // 发送 SSE 格式的错误消息
               const errorMessage = `data: ${JSON.stringify({ 
                 error: true, 
