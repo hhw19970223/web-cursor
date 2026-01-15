@@ -42,7 +42,7 @@ import {
 } from "@/components/ai-elements/sources";
 import type { ToolUIPart } from "ai";
 import { ImageIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGeneratedChartStore } from "./context";
 import { v4 } from "uuid";
 import { cn } from "@/utils/cn";
@@ -117,8 +117,16 @@ export const Chat = () => {
 
   const { loginInfo } = useLoginStore();
   const { setCode, setNewCode, code: html } = useGeneratedChartStore(selector => selector);
+  const jsonRef = useRef('');
+  const jsonName = useRef('');
 
   const addUserMessage = useCallback(({ newText, images, selectedChartType, prompt, messages, json }: any) => {
+    let name = jsonName.current;
+    if (json) {
+      jsonRef.current = json;
+      jsonName.current = name = v4();
+    }
+   
 
     let promptText = ``;
     if (!messages || messages.length === 0) {
@@ -134,9 +142,9 @@ export const Chat = () => {
 
     // 如果有表格数据，添加到提示文本中
     if (json) {
-      promptText += `## @index.json
+      promptText += `## 表格数据全在 @index.json中
 
-### 数据结构说明：
+### 表格数据结构说明：
 - **数据格式**：对象结构，键为 Excel 工作表名称（如 "Sheet1"、"Sheet2" 等）
 - **数据内容**：每个工作表对应一个数组，数组中每个元素是一个对象，代表表格的一行数据
 - **字段名称**：对象的键来自 Excel 表格的列标题，值为对应的单元格数据
@@ -152,10 +160,12 @@ export const Chat = () => {
 - 数据已经是 JSON 结构的数据
 - 总结数据的关键统计信息（如总数、平均值、最大/最小值、趋势等）
 - 提取有价值的数据洞察和发现
+- 必须对所有数据进行分析
+- 如果用户没有额外需求，请对数据进行智能分析，提取出有用的部分，并生成图表
 
 ## 代码生成要求
 - 使用 HTML 单文件格式，包含完整的 HTML 结构（<!DOCTYPE html> 到 </html>）
-- 将上面提供的数据结构直接嵌入到 HTML 的 <script> 标签中
+- **数据加载方式**：必须使用 fetch 从外部 JSON 文件加载数据，禁止在 HTML 中硬编码数据
 - 使用内联 CSS 样式（<style> 标签）进行美化
 - 使用 ECharts（Apache ECharts）通过 CDN 方式引入：https://cdn.jsdelivr.net/npm/echarts@latest/dist/echarts.min.js
 - 所有外部资源（包括字体、图标等）必须使用 CDN 引入，不能有本地路径引用
@@ -166,11 +176,11 @@ export const Chat = () => {
   * 适当的边距和间距
   * 响应式布局设计
   * 适配所有的分辨率
-- 确保代码健壮性，包含必要的错误处理
+- 确保代码健壮性，包含必要的错误处理和数据加载失败的提示
 
 ## 输出格式
 - 所有代码必须在一个 HTML 文件中
-- 数据结构和图表逻辑都在同一个文件中
+- 数据通过 fetch API 从外部 JSON 文件动态加载，不在 HTML 中硬编码
 - 代码结构清晰，有适当的注释说明
 - 直接生成可运行的完整代码，无需额外配置
 
@@ -182,7 +192,62 @@ ${prompt}
 - 用户额外需求：
 ${prompt}
 
+- 表格数据全在 @index.json中
+
+### 表格数据结构说明：
+- **数据格式**：对象结构，键为 Excel 工作表名称（如 "Sheet1"、"Sheet2" 等）
+- **数据内容**：每个工作表对应一个数组，数组中每个元素是一个对象，代表表格的一行数据
+- **字段名称**：对象的键来自 Excel 表格的列标题，值为对应的单元格数据
+- **使用方式**：可以直接在 HTML 的 <script> 标签中使用这些常量，例如：\`const data = 文件名.Sheet1;\`
+
 `;
+
+promptText += `
+## 数据引用方式（重要）
+${name ? `
+- **禁止硬编码数据**：不要将数据直接写在 HTML 中
+- **使用外部数据源**：数据已保存在 \`/generated-json/${name}.json\` 文件中
+- **数据加载方式**：必须使用以下方式从外部 JSON 文件加载数据：
+
+\`\`\`javascript
+// 在 HTML 的 <script> 标签中添加以下代码
+fetch('/generated-json/${name}.json')
+  .then(response => response.json())
+  .then(sourceData => {
+    // sourceData 就是完整的数据对象
+    // 可以通过 sourceData.Sheet1, sourceData.Sheet2 等访问不同工作表的数据
+    // 在这里编写图表初始化代码
+    initChart(sourceData);
+  })
+  .catch(error => {
+    console.error('数据加载失败:', error);
+  });
+\`\`\`
+
+- **变量命名**：将加载的数据赋值给变量 \`sourceData\`
+- **数据结构**：sourceData 是一个对象，包含所有工作表数据（如 sourceData.Sheet1, sourceData.Sheet2）
+- **示例代码结构**：
+\`\`\`html
+<script>
+  // 从外部 JSON 文件加载数据
+  fetch('/generated-json/${name}.json')
+    .then(response => response.json())
+    .then(sourceData => {
+      // 使用 sourceData 进行图表渲染
+      const chartData = sourceData.Sheet1; // 访问 Sheet1 的数据
+      
+      // ECharts 图表配置
+      const option = {
+        // ... 使用 chartData 配置图表
+      };
+      
+      const chart = echarts.init(document.getElementById('main'));
+      chart.setOption(option);
+    });
+</script>
+\`\`\`
+` : ''}
+`
 
     const userMessage: MessageType = {
       key: `user-${Date.now()}`,
@@ -226,6 +291,17 @@ ${prompt}
       setStatus("streaming");
 
       try {
+        if (json) {
+          await fetch('/api/json/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: name,
+              data: JSON.parse(json)
+            })
+          });
+        }
+        
         await fetch("/api/cursor/chat", {
           method: "POST",
           body: JSON.stringify({
@@ -240,7 +316,7 @@ ${prompt}
             richText: "",
             uuid: composerId,
             code:  html,
-            json
+            json: json || jsonRef.current
           }),
         });
 
@@ -368,6 +444,8 @@ ${prompt}
               filename: file?.name,
             });
 
+            console.log(sheetsData);
+
             json = JSON.stringify(sheetsData);
 
             break;
@@ -422,12 +500,16 @@ ${prompt}
             图表类型：
           </label>
           <Select value={selectedChartType} onValueChange={setSelectedChartType}>
-            <SelectTrigger className="w-[180px] h-9">
+            <SelectTrigger className="w-[180px] h-9 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-400 hover:scale-105 hover:-translate-y-0.5 transition-all duration-200 shadow-sm hover:shadow-lg hover:shadow-blue-200/50 active:scale-100 active:translate-y-0">
               <SelectValue placeholder="选择图表类型" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white border-blue-200 shadow-xl shadow-blue-100/50 animate-in fade-in-0 zoom-in-95 duration-200">
               {CHART_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
+                <SelectItem 
+                  key={type.value} 
+                  value={type.value}
+                  className="cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:scale-[1.02] hover:shadow-sm hover:pl-3 focus:bg-gradient-to-r focus:from-blue-100 focus:to-indigo-100 data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-100 data-[state=checked]:to-indigo-100 data-[state=checked]:text-blue-900 data-[state=checked]:font-semibold data-[state=checked]:shadow-sm data-[state=checked]:border-l-4 data-[state=checked]:border-l-blue-500 transition-all duration-150 rounded-md mx-1 my-0.5"
+                >
                   {type.label}
                 </SelectItem>
               ))}
