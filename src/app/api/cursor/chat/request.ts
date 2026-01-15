@@ -129,6 +129,7 @@ export const getReqChatExample = (
   code: string,
   ts: string,
   json: string,
+  isThink: boolean,
 ) => {
   const oldConversation = composerMap[composerId] || [];
 
@@ -289,7 +290,7 @@ export const getReqChatExample = (
     },
     canHandleFilenamesAfterLanguageIds: true,
     modelDetails: {
-      modelName: "claude-4.5-sonnet-thinking",//"default",
+      modelName: isThink ? "claude-4.5-sonnet-thinking" : "default",//"default",
       azureState: {
         apiKey: "",
         baseUrl: "",

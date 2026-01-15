@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   
   try {
 
-    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code, ts, json } = dataMap[uuid];
+    const { token, traceparent, xRequestId, bubbleId, composerId, requestId, text, images, richText, code, ts, json, isThink } = dataMap[uuid];
 
     if (images?.length) {
       for (let i = 0; i < images.length; i++) {
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
           };
 
           const queue = new AsyncQueue<any>();
-          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code, ts, json) }));  
+          queue.push(new _tt({ request: getReqChatExample(bubbleId, composerId, requestId, text, images, richText, code, ts, json, isThink) }));  
 
           const y = async function* () {
             try {
