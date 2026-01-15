@@ -62,10 +62,13 @@ export function Output() {
       if (e.ctrlKey && e.key === "F11") {
         e.preventDefault();
         onNewOpen();
-      } else if (e.ctrlKey && e.key === "s") {
+      } else if (e.ctrlKey && e.shiftKey && e.key === "s") {
         e.preventDefault();
         onLoad();
-      } 
+      } else if (e.ctrlKey && e.key === "u") {
+        e.preventDefault();
+        onLoad();
+      }
     });
   };
 
