@@ -206,12 +206,12 @@ promptText += `
 ## 数据引用方式（重要）
 ${name ? `
 - **禁止硬编码数据**：不要将数据直接写在 HTML 中
-- **使用外部数据源**：数据已保存在 \`/generated-json/${name}.json\` 文件中
+- **使用外部数据源**：数据已保存，可通过 API 访问 \`/api/json/${name}\`
 - **数据加载方式**：必须使用以下方式从外部 JSON 文件加载数据：
 
 \`\`\`javascript
 // 在 HTML 的 <script> 标签中添加以下代码
-fetch('/generated-json/${name}.json')
+fetch('/api/json/${name}')
   .then(response => response.json())
   .then(sourceData => {
     // sourceData 就是完整的数据对象
@@ -230,7 +230,7 @@ fetch('/generated-json/${name}.json')
 \`\`\`html
 <script>
   // 从外部 JSON 文件加载数据
-  fetch('/generated-json/${name}.json')
+  fetch('/api/json/${name}')
     .then(response => response.json())
     .then(sourceData => {
       // 使用 sourceData 进行图表渲染
