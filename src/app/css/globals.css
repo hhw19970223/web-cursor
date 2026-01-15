@@ -8,6 +8,17 @@
 @import './theme/default-colors.css';
 @import './override/reboot.css';
 
+/* 使用系统字体代替 Google Fonts Manrope */
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
