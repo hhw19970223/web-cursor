@@ -1,6 +1,6 @@
 import Frame from "react-frame-component";
 import { useGeneratedChartStore } from "./context";
-import {  useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useGlobalComponentsStore } from "@/stores/global-components";
 
@@ -21,12 +21,11 @@ export function Output() {
 
   const onLoad = async () => {
     try {
-      
       // 调用创建 HTML 接口
-      const response = await fetch('/api/html/create', {
-        method: 'POST',
+      const response = await fetch("/api/html/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           filename,
@@ -35,17 +34,17 @@ export function Output() {
       });
 
       if (!response.ok) {
-        throw new Error('创建 HTML 文件失败');
+        throw new Error("创建 HTML 文件失败");
       }
 
       const result = await response.json();
-      
+
       // 成功后直接打开访问地址
       if (result.success && result.path) {
-        window.open(result.path, '_blank');
+        window.open(result.path, "_blank");
       }
     } catch (error) {
-      console.error('保存 HTML 文件失败:', error);
+      console.error("保存 HTML 文件失败:", error);
       showToast("error", "保存失败，请重试");
     }
   };
@@ -58,7 +57,15 @@ export function Output() {
       setIframeDocument(iframe.contentDocument);
     }
 
-    iframe.contentWindow.addEventListener("keydown", (e: KeyboardEvent) => {
+    // iframe.contentWindow.addEventListener("keydown", (e: KeyboardEvent) => {
+      
+    // });
+  };
+
+  const handleUpdate = () => {};
+
+  return (
+    <div onKeyDown={(e) => {
       if (e.ctrlKey && e.key === "F11") {
         e.preventDefault();
         onNewOpen();
@@ -69,21 +76,17 @@ export function Output() {
         e.preventDefault();
         onLoad();
       }
-    });
-  };
-
-  const handleUpdate = () => {};
-
-  return (
-    <Frame
-      initialContent={code}
-      className="w-full h-full overflow-auto"
-      ref={frameRef}
-      contentDidMount={handleMount}
-      mountTarget="body"
-      contentDidUpdate={handleUpdate}
-    >
-      <></>
-    </Frame>
+    }}>
+      <Frame
+        initialContent={code}
+        className="w-full h-full overflow-auto"
+        ref={frameRef}
+        contentDidMount={handleMount}
+        mountTarget="body"
+        contentDidUpdate={handleUpdate}
+      >
+        <></>
+      </Frame>
+    </div>
   );
 }
