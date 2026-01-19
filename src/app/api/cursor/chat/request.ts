@@ -355,12 +355,9 @@ export const getReqToolImgExample = (tool: string, toolCallId: string) => {
 
 export const getReqToolWebExample = (tool: string, toolCallId: string, web_search: boolean) => {
   const value = {
-    result: {
-      case: "webSearchResult",
-      value: new hXe({
-        references: [],
-        isFinal: web_search,
-      }),
+    webSearchResult: {
+      references: [],
+      isFinal: web_search,
     },
     tool,
     toolCallId,
@@ -375,15 +372,18 @@ export const getReqToolWebExample = (tool: string, toolCallId: string, web_searc
 export const getReqToolWebSearch = (toolCall: any) => {
   const value = {
     clientSideToolV2Call: {
-      isLastMessage: toolCall.isLastMessage,
-      internal: toolCall.internal,
-      isStreaming: toolCall.isStreaming,
+      isLastMessage: true,// toolCall.isLastMessage || false,
+      internal: false,//toolCall.internal || false,
+      isStreaming: true,//toolCall.isStreaming || true,
       name: toolCall.name,
       rawArgs: toolCall.rawArgs,
       toolCallId: toolCall.toolCallId,
       timeoutMs: 240000,
       tool: "CLIENT_SIDE_TOOL_V2_WEB_SEARCH",
-      webSearchParams: toolCall.params.value,
+      params: toolCall.params
+      // webSearchParams: {
+      //   searchTerm: toolCall.params?.value?.searchTerm
+      // },
     },
     eventId: ''
   };

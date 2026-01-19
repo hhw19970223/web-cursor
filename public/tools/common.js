@@ -151,6 +151,7 @@ async function cursorMessageStream(options) {
         const data = JSON.parse(event.data);
         if (data?.message?.streamUnifiedChatResponse) {
           const streamUnifiedChatResponse = data.message.streamUnifiedChatResponse;
+          console.log(streamUnifiedChatResponse);
           // 处理文本消息
           if (streamUnifiedChatResponse.text != null) {
             messageText += streamUnifiedChatResponse.text;
@@ -185,6 +186,7 @@ async function cursorMessageStream(options) {
               onComplete(code);
             }
             // resolve Promise，结束阻塞
+           
             if (resolvePromise) {
               resolvePromise({
                 code,
@@ -192,6 +194,7 @@ async function cursorMessageStream(options) {
                 composerId
               });
             }
+            console.log(code)
           }
         }
       } catch (err) {

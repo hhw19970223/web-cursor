@@ -163,12 +163,15 @@ function assessRisk(url, keywords, title, description, riskKeywords) {
 // ==================== 数据导出工具 ====================
 
 /**
- * 转换为CSV格式
+ * 导出为XLSX格式
  * @param {Array} data - 数据数组
- * @returns {string} - CSV字符串
+ * @param {string} filename - 文件名
  */
-function convertToCSV(data) {
+function exportToExcel(data, filename) {
+    // 定义表头
     const headers = ['序号', 'URL', '标题', '关键词', '描述', '网站摘要', '行业分类', '风险评估', '为什么', 'h1', 'h2', 'h3'];
+    
+    // 转换数据为二维数组
     const rows = data.map(row => [
         row.index,
         row.url,
@@ -184,23 +187,47 @@ function convertToCSV(data) {
         row.h3,
     ]);
     
-    return [headers, ...rows].map(row => 
-        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
-}
-
-/**
- * 下载CSV文件
- * @param {string} csv - CSV内容
- * @param {string} filename - 文件名
- */
-function downloadCSV(csv, filename) {
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
+    // 合并表头和数据
+    const wsData = [headers, ...rows];
+    
+    // 创建工作表
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    // 设置列宽（根据内容自适应）
+    const colWidths = [
+        { wch: 6 },   // 序号
+        { wch: 40 },  // URL
+        { wch: 30 },  // 标题
+        { wch: 25 },  // 关键词
+        { wch: 40 },  // 描述
+        { wch: 50 },  // 网站摘要
+        { wch: 12 },  // 行业分类
+        { wch: 10 },  // 风险评估
+        { wch: 30 },  // 为什么
+        { wch: 25 },  // h1
+        { wch: 25 },  // h2
+        { wch: 25 },  // h3
+    ];
+    ws['!cols'] = colWidths;
+    
+    // 设置表头样式（粗体、背景色）
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_col(C) + "1";
+        if (!ws[address]) continue;
+        ws[address].s = {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "4F81BD" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+    }
+    
+    // 创建工作簿
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "URL分析报告");
+    
+    // 导出文件
+    XLSX.writeFile(wb, filename);
 }
 
 // ==================== 日志工具 ====================

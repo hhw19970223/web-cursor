@@ -247,6 +247,14 @@
         td {
             padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.5;
+            word-break: break-word;
         }
 
         tbody tr:hover {
@@ -455,12 +463,13 @@
                             <th>网站摘要</th>
                             <th>行业分类</th>
                             <th>风险评估</th>
+                            <th>风险原因</th>
                             <th>状态</th>
                         </tr>
                     </thead>
                     <tbody id="resultsTableBody">
                         <tr>
-                            <td colspan="9" style="text-align: center; padding: 30px; color: #999;">
+                            <td colspan="10" style="text-align: center; padding: 30px; color: #999;">
                                 暂无数据，请点击"开始分析"按钮
                             </td>
                         </tr>
@@ -617,6 +626,7 @@
             let h1 = '';
             let h2 = '';
             let h3 = '';
+            let flag = false;
 
 
             let summary = generateSummary(url, keywords);
@@ -637,11 +647,13 @@
 5. 说明风险评估的具体原因
 6. 帮我生成以下固定格式的json数据
 
+**important**: 请不要使用CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2工具
+
 **重要：请严格按照以下JSON格式，不要包含任何其他文字说明：**
 
 {
   "summary": "对网站的总结描述（100字以内）",
-  "industryKeywords": "所属行业分类",
+  "industry": "所属行业分类",
   "risk": "风险等级（高风险/可疑/安全）",
   "why": "风险评估等级的原因说明"，
   "description": "网站描述"
@@ -654,18 +666,19 @@
 
                 const json = JSON.parse(result.code);
                 summary = json.summary;
-                industryKeywords = json.industryKeywords;
+                industry = json.industry;
                 risk = json.risk;
                 why = json.why;
                 description = json.description;
                 keywords = json.keywords;
                 title = json.title;
+                flag = true;
             } catch (e) {
                 console.error('Error analyzing URL:', e);
             }
 
             try {
-                if (keywords) {
+                if (flag) {
                     return;
                 }
                 const result = await fetch('/api/url', {
@@ -696,6 +709,7 @@
                 summary,
                 industry,
                 risk,
+                why: why || '无风险或未检测到风险特征',
                 status: 'completed',
                 h1,
                 h2,
@@ -791,19 +805,20 @@
 
             tbody.innerHTML = lastResults.map(result => `
                 <tr>
-                    <td>${result.index}</td>
-                    <td class="url-cell" title="${result.url}">${result.url}</td>
-                    <td>${result.title}</td>
-                    <td>${result.keywords}</td>
-                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${result.description}</td>
-                    <td>${result.summary}</td>
-                    <td><strong>${result.industry}</strong></td>
-                    <td>
+                    <td style="min-width: 50px;">${result.index}</td>
+                    <td title="${result.url}">${result.url}</td>
+                    <td title="${result.title}">${result.title}</td>
+                    <td title="${result.keywords}">${result.keywords}</td>
+                    <td title="${result.description}">${result.description}</td>
+                    <td title="${result.summary}">${result.summary}</td>
+                    <td style="min-width: 100px;"><strong>${result.industry}</strong></td>
+                    <td style="min-width: 80px;">
                         <span class="badge ${result.risk === '安全' ? 'badge-safe' : result.risk === '高风险' ? 'badge-risk' : 'badge-unknown'}">
                             ${result.risk}
                         </span>
                     </td>
-                    <td>✅ 完成</td>
+                    <td title="${result.why || '无风险或未检测到风险特征'}">${result.why || '无风险或未检测到风险特征'}</td>
+                    <td style="min-width: 80px;">✅ 完成</td>
                 </tr>
             `).join('');
         }
@@ -822,9 +837,8 @@
                 return;
             }
 
-            const csv = convertToCSV(analyzedResults);
-            downloadCSV(csv, 'url_analysis_report.csv');
-            addLog('报告导出成功', 'success');
+            exportToExcel(analyzedResults, 'url_analysis_report.xlsx');
+            addLog('Excel报告导出成功', 'success');
         }
 
         // 事件监听
