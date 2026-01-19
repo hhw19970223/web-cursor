@@ -457,6 +457,7 @@
                         <tr>
                             <th>序号</th>
                             <th>URL</th>
+                            <th>数量</th>
                             <th>标题</th>
                             <th>关键词</th>
                             <th>描述</th>
@@ -469,7 +470,7 @@
                     </thead>
                     <tbody id="resultsTableBody">
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 30px; color: #999;">
+                            <td colspan="11" style="text-align: center; padding: 30px; color: #999;">
                                 暂无数据，请点击"开始分析"按钮
                             </td>
                         </tr>
@@ -560,36 +561,58 @@
                     }
 
                     // 提取URL并验证
-                    const urls = [];
+                    const urlMap = new Map(); // 用于合并相同URL
                     let emptyCount = 0;
+                    let totalRowCount = 0;
 
                     jsonData.forEach((row, index) => {
                         const url = row[urlColumn];
                         if (url && String(url).trim()) {
-                            urls.push({ ...row, url: String(url).trim() });
+                            totalRowCount++;
+                            const trimmedUrl = String(url).trim();
+
+                            // 如果URL已存在，增加计数；否则添加新URL
+                            if (urlMap.has(trimmedUrl)) {
+                                const existing = urlMap.get(trimmedUrl);
+                                existing.count += 1;
+                            } else {
+                                urlMap.set(trimmedUrl, {
+                                    ...row,
+                                    url: trimmedUrl,
+                                    count: 1
+                                });
+                            }
                         } else {
                             emptyCount++;
                         }
                     });
 
-                    if (urls.length === 0) {
+                    if (urlMap.size === 0) {
                         showError('文件解析失败：所有URL均为空\n请检查文件中是否包含有效的URL数据');
                         addLog('解析失败：没有有效的URL数据', 'error');
                         return;
                     }
 
+                    // 转换为数组
+                    const urls = Array.from(urlMap.values());
+
                     // 保存数据
                     sourceData = { Sheet1: urls, urlColumn };
 
                     // 更新统计
-                    const totalCount = urls.length;
-                    document.getElementById('totalUrls').textContent = totalCount.toLocaleString();
+                    const uniqueCount = urls.length;
+                    const duplicateCount = totalRowCount - uniqueCount;
+                    document.getElementById('totalUrls').textContent = uniqueCount.toLocaleString();
 
                     // 启用开始按钮
                     document.getElementById('startBtn').disabled = false;
 
                     // 显示成功信息
-                    let logMessage = `文件解析成功！共 ${totalCount} 条有效URL记录`;
+                    let logMessage = `文件解析成功！共 ${totalRowCount} 条URL记录，去重后 ${uniqueCount} 条唯一URL`;
+                    if (duplicateCount > 0) {
+                        logMessage += `（合并了 ${duplicateCount} 条重复URL）`;
+                        addLog(`警告：发现 ${duplicateCount} 条重复URL已被合并`, 'warning');
+                    }
                     if (emptyCount > 0) {
                         logMessage += `（跳过 ${emptyCount} 条空记录）`;
                         addLog(`警告：发现 ${emptyCount} 条空URL记录已被跳过`, 'warning');
@@ -614,7 +637,7 @@
 
 
         // 模拟URL分析
-        async function analyzeUrl(url, index) {
+        async function analyzeUrl(url, index, count = 1) {
             // 模拟网络请求延迟
             await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
 
@@ -661,7 +684,7 @@
   "title": "标题"
 }`,
                 });
- 
+
                 const result = await stream.wait(); // 阻塞
 
                 const json = JSON.parse(result.code);
@@ -678,23 +701,23 @@
             }
 
             try {
-                if (flag) {
-                    return;
-                }
-                const result = await fetch('/api/url', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        url,
-                    }),
-                })
-                    .then((res) => res.json())
+                if (!flag) {
+                    const result = await fetch('/api/url', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            url,
+                        }),
+                    })
+                        .then((res) => res.json())
 
-                title = result.title;
-                keywords = result.keywords;
-                description = result.description;
-                h1 = result.h1?.join('|||') || '';
-                h2 = result.h2?.join('|||') || '';
-                h3 = result.h3?.join('|||') || '';
+                    title = result.title;
+                    keywords = result.keywords;
+                    description = result.description;
+                    h1 = result.h1?.join('|||') || '';
+                    h2 = result.h2?.join('|||') || '';
+                    h3 = result.h3?.join('|||') || '';
+                }
+
             } catch (error) {
                 console.error('Error analyzing URL:', error);
             }
@@ -703,6 +726,7 @@
             return {
                 index: index + 1,
                 url,
+                count, // 保留数量字段
                 title,
                 keywords,
                 description,
@@ -737,17 +761,19 @@
 
             // 分析所有数据
             const urlColumn = sourceData.urlColumn || 'url';
-            const urls = sourceData.Sheet1.map(item => item.url || item[urlColumn]);
-            const total = urls.length;
+            const urlData = sourceData.Sheet1; // 保留完整数据对象，包含count字段
+            const total = urlData.length;
 
-            addLog(`开始分析全部数据，共 ${total} 个URL，并发数: ${concurrent}`, 'info');
+            addLog(`开始分析全部数据，共 ${total} 个唯一URL，并发数: ${concurrent}`, 'info');
 
             // 批量分析
             for (let i = 0; i < total; i += concurrent) {
                 if (!isAnalyzing) break;
 
-                const batch = urls.slice(i, i + concurrent);
-                const promises = batch.map((url, idx) => analyzeUrl(url, i + idx));
+                const batch = urlData.slice(i, i + concurrent);
+                const promises = batch.map((item, idx) =>
+                    analyzeUrl(item.url || item[urlColumn], i + idx, item.count || 1)
+                );
 
                 try {
                     const results = await Promise.all(promises);
@@ -776,8 +802,8 @@
         // 更新统计
         function updateStats() {
             const total = analyzedResults.length;
-            const riskCount = analyzedResults.filter(r => r.risk === '高风险').length;
-            const safeCount = analyzedResults.filter(r => r.risk === '安全').length;
+            const riskCount = analyzedResults.filter(r => r?.risk === '高风险').length;
+            const safeCount = analyzedResults.filter(r => r?.risk === '安全').length;
 
             document.getElementById('analyzedUrls').textContent = total;
             document.getElementById('riskUrls').textContent = riskCount;
@@ -807,6 +833,7 @@
                 <tr>
                     <td style="min-width: 50px;">${result.index}</td>
                     <td title="${result.url}">${result.url}</td>
+                    <td style="min-width: 60px; text-align: center;"><strong>${result.count || 1}</strong></td>
                     <td title="${result.title}">${result.title}</td>
                     <td title="${result.keywords}">${result.keywords}</td>
                     <td title="${result.description}">${result.description}</td>

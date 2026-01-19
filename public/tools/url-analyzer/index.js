@@ -169,12 +169,13 @@ function assessRisk(url, keywords, title, description, riskKeywords) {
  */
 function exportToExcel(data, filename) {
     // 定义表头
-    const headers = ['序号', 'URL', '标题', '关键词', '描述', '网站摘要', '行业分类', '风险评估', '为什么', 'h1', 'h2', 'h3'];
+    const headers = ['序号', 'URL', '数量', '标题', '关键词', '描述', '网站摘要', '行业分类', '风险评估', '为什么', 'h1', 'h2', 'h3'];
     
     // 转换数据为二维数组
     const rows = data.map(row => [
         row.index,
         row.url,
+        row.count,
         row.title,
         row.keywords,
         row.description,
