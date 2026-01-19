@@ -127,7 +127,7 @@ export async function GET(request: Request) {
                   } else if (tool === 'CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2') {
                     queue.push(new _tt({ request: getReqToolImgExample(partialToolCall.tool, partialToolCall.toolCallId) }));  
                   }
-              } else if (chunk.response.value?.name  === 'web_search') {
+              } else if (chunk.response?.value?.name  === 'web_search') {
                 queue.push(new _tt({ request: getReqToolWebSearch(chunk.response.value) }));  
                 web_search = true;
               }

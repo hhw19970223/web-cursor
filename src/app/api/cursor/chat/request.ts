@@ -383,7 +383,7 @@ export const getReqToolWebSearch = (toolCall: any) => {
       toolCallId: toolCall.toolCallId,
       timeoutMs: 240000,
       tool: "CLIENT_SIDE_TOOL_V2_WEB_SEARCH",
-      webSearchParams: toolCall.param.value,
+      webSearchParams: toolCall.params.value,
     },
     eventId: ''
   };
