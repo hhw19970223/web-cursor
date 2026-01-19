@@ -702,22 +702,26 @@
                     });
                     result = await stream.wait(); // 阻塞
                     if (!result) {
-                    const stream = await cursorMessageStream({
-                        prompt: text,
-                    });
-                    result = await stream.wait(); // 阻塞
-                }
+                        const stream = await cursorMessageStream({
+                            prompt: text,
+                        });
+                        result = await stream.wait(); // 阻塞
+                    }
                 }
 
-                const json = JSON.parse(result.code);
-                summary = json.summary;
-                industry = json.industry;
-                risk = json.risk;
-                why = json.why;
-                description = json.description;
-                keywords = json.keywords;
-                title = json.title;
-                flag = true;
+                try {
+                    const json = JSON.parse(result.code);
+                    summary = json.summary;
+                    industry = json.industry;
+                    risk = json.risk;
+                    why = json.why;
+                    description = json.description;
+                    keywords = json.keywords;
+                    title = json.title;
+                    flag = true;
+                } catch (e) {
+                    console.error('Error analyzing URL:', result.code);
+                }
             } catch (e) {
                 console.error('Error analyzing URL:', e);
             }
@@ -839,37 +843,37 @@
 
             // 使用队列方式分析
             const taskQueue = new TaskQueue(concurrent);
-            
+
             // 将所有URL添加到队列
             for (let i = 0; i < total; i++) {
                 if (!isAnalyzing) break;
-                
+
                 const item = urlData[i];
                 const url = item.url || item[urlColumn];
                 const count = item.count || 1;
-                
+
                 // 添加任务到队列（不等待）
                 taskQueue.add(async () => {
                     const result = await analyzeUrl(url, i, count);
-                    
+
                     // 每完成一个任务就更新UI
                     analyzedResults.push(result);
                     updateStats();
                     updateProgress(analyzedResults.length, total);
                     updateTable();
                     updateChartsData();
-                    
+
                     if (analyzedResults.length % 10 === 0) {
                         addLog(`已完成 ${analyzedResults.length}/${total}`, 'success');
                     }
-                    
+
                     return result;
                 }).catch(error => {
                     console.error('Error analyzing URL:', error);
                     addLog(`URL分析出错: ${error.message}`, 'error');
                 });
             }
-            
+
             // 等待所有任务完成
             try {
                 await taskQueue.waitAll();
