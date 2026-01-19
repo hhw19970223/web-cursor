@@ -163,6 +163,9 @@ async function cursorMessageStream(options) {
           // 处理代码工具调用
           if (streamUnifiedChatResponse.toolCall) {
             const toolCall = streamUnifiedChatResponse.toolCall;
+            if ('CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2' === toolCall.tool) {
+              resolvePromise(null);
+            }
             if (toolCall.rawArgs) {
               try {
                 const args = JSON.parse(toolCall.rawArgs);
