@@ -652,15 +652,15 @@
             const domain = extractDomain(url);
             let title = ``;
             let keywords = '';
-            let description = ``;
+            let description = `这是 ${domain} 的网站描述，提供各种服务...`;
             let h1 = '';
             let h2 = '';
             let h3 = '';
             let flag = false;
 
 
-            let summary = generateSummary(url, keywords);
-            let industry = classifyIndustry(url, keywords, title, description, industryKeywords);
+            let summary = '';
+            let industry = '';
             let risk = '未知';
 
             const text = `请分析以下网站信息并返回JSON格式的分析结果：
@@ -711,13 +711,13 @@
 
                 try {
                     const json = JSON.parse(result.code);
-                    summary = json.summary;
-                    industry = json.industry;
-                    risk = json.risk;
-                    why = json.why;
-                    description = json.description;
-                    keywords = json.keywords;
-                    title = json.title;
+                    summary = json.summary || '';
+                    industry = json.industry || '';
+                    risk = json.risk || '';
+                    why = json.why || '';
+                    description = json.description || '';
+                    keywords = json.keywords || '';
+                    title = json.title || '';
                     flag = true;
                 } catch (e) {
                     console.error('Error analyzing URL:', result.code);
@@ -736,9 +736,9 @@
                     })
                         .then((res) => res.json())
 
-                    title = result.title;
-                    keywords = result.keywords;
-                    description = result.description;
+                    title = result.title || '';
+                    keywords = result.keywords || '';
+                    description = result.description || '';
                     h1 = result.h1?.join('|||') || '';
                     h2 = result.h2?.join('|||') || '';
                     h3 = result.h3?.join('|||') || '';
