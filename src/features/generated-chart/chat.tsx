@@ -383,6 +383,9 @@ fetch('/api/json/${name}')
         };
       } catch (e) {
         setStatus("ready");
+        console.error(e);
+        // @ts-expect-error message
+        showToast('error', e?.message || '代码生成失败，请重试');
       }
     }, 500);
   }, []);

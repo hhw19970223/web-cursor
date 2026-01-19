@@ -3,9 +3,13 @@
 /** 全局推送事件 */
 
 export const enum EVENT_MITT {
-  test = 'test',
+  error = 'error',
+  finish = 'finish',
+  all = '*',
 }
 
 export type EventType = {
-  [EVENT_MITT.test]: void;
+  [EVENT_MITT.error]: any;
+  [EVENT_MITT.finish]: any;
+  [EVENT_MITT.all]: void;
 };

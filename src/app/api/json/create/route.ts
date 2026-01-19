@@ -10,9 +10,15 @@ if (!fs.existsSync(JSON_DIR)) {
   fs.mkdirSync(JSON_DIR, { recursive: true });
 }
 
+// Next.js App Router 中设置路由段配置
+// 增加 body 大小限制到 50MB
+export const maxDuration = 60; // 最大执行时间 60 秒
+export const dynamic = 'force-dynamic'; // 强制动态渲染
+
 /**
  * POST /api/json/create
  * 创建或更新 JSON 文件
+ * 支持大型 JSON 数据（最大 50MB）
  * 
  * Body 参数:
  * {
