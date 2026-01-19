@@ -353,17 +353,39 @@ export const getReqToolImgExample = (tool: string, toolCallId: string) => {
   };
 };
 
-export const getReqToolWebExample = (tool: string, toolCallId: string) => {
+export const getReqToolWebExample = (tool: string, toolCallId: string, web_search: boolean) => {
   const value = {
     result: {
       case: "webSearchResult",
       value: new hXe({
         references: [],
-        isFinal: true,
+        isFinal: web_search,
       }),
     },
     tool,
     toolCallId,
+  };
+
+  return {
+    case: "clientSideToolV2Result",
+    value: new xu(value),
+  };
+};
+
+export const getReqToolWebSearch = (toolCall: any) => {
+  const value = {
+    clientSideToolV2Call: {
+      isLastMessage: toolCall.isLastMessage,
+      internal: toolCall.internal,
+      isStreaming: toolCall.isStreaming,
+      name: toolCall.name,
+      rawArgs: toolCall.rawArgs,
+      toolCallId: toolCall.toolCallId,
+      timeoutMs: 240000,
+      tool: "CLIENT_SIDE_TOOL_V2_WEB_SEARCH",
+      webSearchParams: toolCall.param.value,
+    },
+    eventId: ''
   };
 
   return {

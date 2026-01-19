@@ -12,6 +12,7 @@ interface CacheEntry {
     title: string;
     description: string;
     image: string;
+    keywords: string;
     h1: string[];
     h2: string[];
     h3: string[];
@@ -159,6 +160,7 @@ async function extractMetaInfo(html: string): Promise<{
   title: string;
   description: string;
   image: string;
+  keywords: string;
   h1: string[];
   h2: string[];
   h3: string[];
@@ -188,6 +190,11 @@ async function extractMetaInfo(html: string): Promise<{
       .querySelector('meta[property="og:image"]')
       ?.getAttribute('content') || '';
 
+  const keywords =
+    document
+      .querySelector('meta[name="keywords"]')
+      ?.getAttribute('content') || '';
+
   // 提取 h1、h2、h3 标签内容
   const h1Elements = document.querySelectorAll('h1');
   const h2Elements = document.querySelectorAll('h2');
@@ -205,7 +212,7 @@ async function extractMetaInfo(html: string): Promise<{
     .map((el: Element) => el.textContent?.trim() || '')
     .filter((text) => text.length > 0);
 
-  return { title, description, image, h1, h2, h3 };
+  return { title, description, image, keywords, h1, h2, h3 };
 }
 
 export async function POST(request: Request) {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +30,7 @@
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -58,7 +59,7 @@
             padding: 20px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .stat-value {
@@ -77,7 +78,7 @@
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .control-group {
@@ -153,7 +154,7 @@
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .progress-bar-container {
@@ -195,7 +196,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
         .chart-title {
@@ -214,7 +215,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
@@ -293,8 +294,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .log-container {
@@ -313,37 +319,49 @@
             margin-bottom: 5px;
         }
 
-        .log-info { color: #4ec9b0; }
-        .log-success { color: #4caf50; }
-        .log-warning { color: #ff9800; }
-        .log-error { color: #f44336; }
+        .log-info {
+            color: #4ec9b0;
+        }
+
+        .log-success {
+            color: #4caf50;
+        }
+
+        .log-warning {
+            color: #ff9800;
+        }
+
+        .log-error {
+            color: #f44336;
+        }
 
         @media (max-width: 768px) {
             .charts-row {
                 grid-template-columns: 1fr;
             }
-            
+
             h1 {
                 font-size: 24px;
             }
-            
+
             .stat-card {
                 padding: 15px;
             }
-            
+
             .stat-value {
                 font-size: 28px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- 头部 -->
         <div class="header">
             <h1>🔍 URL批量分析系统</h1>
             <p class="subtitle">智能分析网站行业分类与高风险产业识别</p>
-            
+
             <div class="stats-row">
                 <div class="stat-card">
                     <div class="stat-value" id="totalUrls">0</div>
@@ -364,31 +382,32 @@
             </div>
         </div>
 
+        <!-- 文件上传面板 -->
+        <div class="control-panel">
+            <h3 style="margin-bottom: 20px;">📂 数据导入</h3>
+            <div class="control-group">
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                <button class="btn btn-primary" id="uploadBtn">
+                    <span>📤</span> 选择文件（Excel/CSV）
+                </button>
+                <span id="fileNameDisplay" style="color: #666; font-size: 14px;">未选择文件</span>
+            </div>
+        </div>
+
         <!-- 控制面板 -->
         <div class="control-panel">
-            <h3 style="margin-bottom: 20px;">控制面板</h3>
+            <h3 style="margin-bottom: 20px;">⚙️ 控制面板</h3>
             <div class="control-group">
-                <button class="btn btn-primary" id="startBtn">
-                    <span>▶️</span> 开始分析
-                </button>
-                <button class="btn btn-secondary" id="pauseBtn" disabled>
-                    <span>⏸️</span> 暂停
-                </button>
-                <button class="btn btn-secondary" id="stopBtn" disabled>
-                    <span>⏹️</span> 停止
+                <button class="btn btn-primary" id="startBtn" disabled>
+                    <span>▶️</span> 开始分析（全部）
                 </button>
                 <button class="btn btn-success" id="exportBtn">
-                    <span>📥</span> 导出报告
+                    <span>📥</span> 导出分析数据
                 </button>
-                
-                <div class="input-group">
-                    <label>分析数量:</label>
-                    <input type="number" id="limitInput" value="100" min="1" max="10000">
-                </div>
-                
+
                 <div class="input-group">
                     <label>并发数:</label>
-                    <input type="number" id="concurrentInput" value="3" min="1" max="10">
+                    <input type="number" id="concurrentInput" value="6" min="1" max="20">
                 </div>
             </div>
         </div>
@@ -403,7 +422,7 @@
                 <span id="progressText">等待开始...</span>
                 <span id="speedText">速度: 0 URL/s</span>
             </div>
-            
+
             <div class="log-container" id="logContainer" style="margin-top: 20px;">
                 <div class="log-entry log-info">系统就绪，等待开始分析...</div>
             </div>
@@ -452,14 +471,17 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/echarts@latest/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="../common.js"></script>
+    <script src="./index.js"></script>
     <script>
         // 全局变量
         let sourceData = null;
         let analyzedResults = [];
         let isAnalyzing = false;
-        let isPaused = false;
         let currentIndex = 0;
         let startTime = 0;
+        let charts = null; // 图表实例
 
         // 行业关键词映射
         const industryKeywords = {
@@ -479,117 +501,108 @@
 
         // 高风险关键词
         const riskKeywords = [
-            'casino', 'gambling', 'bet', 'porn', 'adult', 'xxx', 
+            'casino', 'gambling', 'bet', 'porn', 'adult', 'xxx',
             'drugs', 'loan shark', 'scam', 'hack', 'crack',
             '博彩', '赌博', '色情', '成人', '高利贷', '诈骗', '黑客'
         ];
 
         // 初始化
         async function init() {
-            addLog('正在加载数据...', 'info');
-            try {
-                const response = await fetch('/api/json/123456');
-                sourceData = await response.json();
-                
-                if (sourceData && sourceData.Sheet1) {
-                    const totalCount = sourceData.Sheet1.length;
-                    document.getElementById('totalUrls').textContent = totalCount.toLocaleString();
-                    addLog(`数据加载成功！共 ${totalCount} 条URL记录`, 'success');
-                    
-                    // 初始化图表
-                    initCharts();
-                } else {
-                    addLog('数据格式错误', 'error');
-                }
-            } catch (error) {
-                addLog(`数据加载失败: ${error.message}`, 'error');
-                // 使用模拟数据用于演示
-                addLog('使用模拟数据进行演示...', 'warning');
-                sourceData = { Sheet1: [] };
-                setTimeout(() => {
-                    startAnalysis();
-                }, 1000);
-            }
+            addLog('系统就绪，请上传Excel或CSV文件', 'info');
+            charts = initCharts();
         }
 
-        // 初始化图表
-        function initCharts() {
-            const industryChart = echarts.init(document.getElementById('industryChart'));
-            const riskChart = echarts.init(document.getElementById('riskChart'));
+        // 处理文件上传
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-            const industryOption = {
-                tooltip: {
-                    trigger: 'item',
-                    formatter: '{b}: {c} ({d}%)'
-                },
-                legend: {
-                    orient: 'vertical',
-                    right: 10,
-                    top: 'center',
-                    textStyle: { fontSize: 12 }
-                },
-                series: [{
-                    type: 'pie',
-                    radius: ['40%', '70%'],
-                    avoidLabelOverlap: false,
-                    itemStyle: {
-                        borderRadius: 10,
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    },
-                    label: {
-                        show: false
-                    },
-                    emphasis: {
-                        label: {
-                            show: true,
-                            fontSize: 16,
-                            fontWeight: 'bold'
-                        }
-                    },
-                    data: []
-                }]
-            };
+            // 显示文件名
+            document.getElementById('fileNameDisplay').textContent = `已选择: ${file.name}`;
+            addLog(`正在解析文件: ${file.name}`, 'info');
 
-            const riskOption = {
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                xAxis: {
-                    type: 'category',
-                    data: ['安全', '可疑', '高风险', '未知'],
-                    axisLabel: { fontSize: 12 }
-                },
-                yAxis: {
-                    type: 'value',
-                    axisLabel: { fontSize: 12 }
-                },
-                series: [{
-                    type: 'bar',
-                    data: [0, 0, 0, 0],
-                    itemStyle: {
-                        color: (params) => {
-                            const colors = ['#10b981', '#f59e0b', '#ef4444', '#6b7280'];
-                            return colors[params.dataIndex];
-                        },
-                        borderRadius: [10, 10, 0, 0]
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // 获取第一个工作表
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    // 转换为JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (!jsonData || jsonData.length === 0) {
+                        showError('文件解析失败：文件为空或格式不正确');
+                        addLog('解析失败：文件内容为空', 'error');
+                        return;
                     }
-                }]
+
+                    // 查找URL列
+                    const urlColumn = findUrlColumn(jsonData[0]);
+
+                    if (!urlColumn) {
+                        showError('文件解析失败：未找到URL列\n请确保文件中包含URL相关的列（如：url、网址、链接、提取页面url等）');
+                        addLog('解析失败：未找到URL列', 'error');
+                        return;
+                    }
+
+                    // 提取URL并验证
+                    const urls = [];
+                    let emptyCount = 0;
+
+                    jsonData.forEach((row, index) => {
+                        const url = row[urlColumn];
+                        if (url && String(url).trim()) {
+                            urls.push({ ...row, url: String(url).trim() });
+                        } else {
+                            emptyCount++;
+                        }
+                    });
+
+                    if (urls.length === 0) {
+                        showError('文件解析失败：所有URL均为空\n请检查文件中是否包含有效的URL数据');
+                        addLog('解析失败：没有有效的URL数据', 'error');
+                        return;
+                    }
+
+                    // 保存数据
+                    sourceData = { Sheet1: urls, urlColumn };
+
+                    // 更新统计
+                    const totalCount = urls.length;
+                    document.getElementById('totalUrls').textContent = totalCount.toLocaleString();
+
+                    // 启用开始按钮
+                    document.getElementById('startBtn').disabled = false;
+
+                    // 显示成功信息
+                    let logMessage = `文件解析成功！共 ${totalCount} 条有效URL记录`;
+                    if (emptyCount > 0) {
+                        logMessage += `（跳过 ${emptyCount} 条空记录）`;
+                        addLog(`警告：发现 ${emptyCount} 条空URL记录已被跳过`, 'warning');
+                    }
+                    addLog(logMessage, 'success');
+                    addLog(`URL列名: ${urlColumn}`, 'info');
+
+                } catch (error) {
+                    showError('文件解析失败：' + error.message + '\n请确保文件格式正确（支持.xlsx、.xls、.csv格式）');
+                    addLog(`解析错误: ${error.message}`, 'error');
+                    console.error('File parse error:', error);
+                }
             };
 
-            industryChart.setOption(industryOption);
-            riskChart.setOption(riskOption);
+            reader.onerror = function () {
+                showError('文件读取失败：无法读取文件\n请检查文件是否损坏或正在被其他程序占用');
+                addLog('文件读取失败', 'error');
+            };
 
-            window.industryChart = industryChart;
-            window.riskChart = riskChart;
-
-            // 响应式
-            window.addEventListener('resize', () => {
-                industryChart.resize();
-                riskChart.resize();
-            });
+            reader.readAsArrayBuffer(file);
         }
+
 
         // 模拟URL分析
         async function analyzeUrl(url, index) {
@@ -598,12 +611,81 @@
 
             // 模拟提取数据
             const domain = extractDomain(url);
-            const title = `${domain} - 网站标题`;
-            const keywords = generateKeywords(url);
-            const description = `这是 ${domain} 的网站描述，提供各种服务...`;
-            const summary = generateSummary(url, keywords);
-            const industry = classifyIndustry(url, keywords, title, description);
-            const risk = assessRisk(url, keywords, title, description);
+            let title = `${domain} - 网站标题`;
+            let keywords = '';
+            let description = `这是 ${domain} 的网站描述，提供各种服务...`;
+            let h1 = '';
+            let h2 = '';
+            let h3 = '';
+
+
+            let summary = generateSummary(url, keywords);
+            let industry = classifyIndustry(url, keywords, title, description, industryKeywords);
+            let risk = assessRisk(url, keywords, title, description, riskKeywords);
+
+            try {
+                const stream = await cursorMessageStream({
+                    prompt: `请分析以下网站信息并返回JSON格式的分析结果：
+
+网站URL: ${url}
+
+请完成以下任务：
+1. 访问并分析该网站的内容和特征，并且记录下网站头部信息的title，keywords和description
+2. 根据提供的标题、关键词和描述，生成一句话的网站总结（100字以内）
+3. 判断网站所属行业类别（从以下选项中选择最合适的一个）：电子商务、金融服务、科技/IT、教育培训、医疗健康、房地产、汽车、媒体/娱乐、社交网络、餐饮美食、旅游、企业服务、其他
+4. 评估网站风险等级，判断是否涉及色情、赌博或其他灰色产业，风险等级分为：高风险、可疑、安全
+5. 说明风险评估的具体原因
+6. 帮我生成以下固定格式的json数据
+
+**重要：请严格按照以下JSON格式，不要包含任何其他文字说明：**
+
+{
+  "summary": "对网站的总结描述（100字以内）",
+  "industryKeywords": "所属行业分类",
+  "risk": "风险等级（高风险/可疑/安全）",
+  "why": "风险评估等级的原因说明"，
+  "description": "网站描述"
+  "keywords": "关键词"
+  "title": "标题"
+}`,
+                });
+ 
+                const result = await stream.wait(); // 阻塞
+
+                const json = JSON.parse(result.code);
+                summary = json.summary;
+                industryKeywords = json.industryKeywords;
+                risk = json.risk;
+                why = json.why;
+                description = json.description;
+                keywords = json.keywords;
+                title = json.title;
+            } catch (e) {
+                console.error('Error analyzing URL:', error);
+            }
+
+            try {
+                if (keywords) {
+                    return;
+                }
+                const result = await fetch('/api/url', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        url,
+                    }),
+                })
+                    .then((res) => res.json())
+
+                title = result.title;
+                keywords = result.keywords;
+                description = result.description;
+                h1 = result.h1?.join('|||') || '';
+                h2 = result.h2?.join('|||') || '';
+                h3 = result.h3?.join('|||') || '';
+            } catch (error) {
+                console.error('Error analyzing URL:', error);
+            }
+
 
             return {
                 index: index + 1,
@@ -614,165 +696,67 @@
                 summary,
                 industry,
                 risk,
-                status: 'completed'
+                status: 'completed',
+                h1,
+                h2,
+                h3
             };
         }
 
-        // 提取域名
-        function extractDomain(url) {
-            try {
-                const urlObj = new URL(url);
-                return urlObj.hostname.replace('www.', '');
-            } catch {
-                return url;
-            }
-        }
-
-        // 生成关键词
-        function generateKeywords(url) {
-            const domain = extractDomain(url).toLowerCase();
-            const keywords = [];
-            
-            // 从域名提取关键词
-            const parts = domain.split('.');
-            keywords.push(...parts[0].split('-'));
-            
-            // 添加一些相关关键词
-            if (domain.includes('shop') || domain.includes('store')) {
-                keywords.push('ecommerce', 'shopping');
-            }
-            if (domain.includes('tech') || domain.includes('dev')) {
-                keywords.push('technology', 'software');
-            }
-            
-            return keywords.slice(0, 5).join(', ');
-        }
-
-        // 生成摘要
-        function generateSummary(url, keywords) {
-            const domain = extractDomain(url);
-            return `${domain} 是一个专注于 ${keywords.split(',')[0]} 相关服务的网站，为用户提供优质的在线体验和专业服务。`;
-        }
-
-        // 行业分类
-        function classifyIndustry(url, keywords, title, description) {
-            const text = `${url} ${keywords} ${title} ${description}`.toLowerCase();
-            
-            let maxScore = 0;
-            let detectedIndustry = '其他';
-            
-            for (const [industry, kws] of Object.entries(industryKeywords)) {
-                let score = 0;
-                for (const kw of kws) {
-                    if (text.includes(kw.toLowerCase())) {
-                        score++;
-                    }
-                }
-                if (score > maxScore) {
-                    maxScore = score;
-                    detectedIndustry = industry;
-                }
-            }
-            
-            return detectedIndustry;
-        }
-
-        // 风险评估
-        function assessRisk(url, keywords, title, description) {
-            const text = `${url} ${keywords} ${title} ${description}`.toLowerCase();
-            
-            let riskScore = 0;
-            for (const kw of riskKeywords) {
-                if (text.includes(kw.toLowerCase())) {
-                    riskScore++;
-                }
-            }
-            
-            if (riskScore >= 2) return '高风险';
-            if (riskScore === 1) return '可疑';
-            
-            // 随机模拟一些风险（用于演示）
-            const random = Math.random();
-            if (random < 0.05) return '高风险';
-            if (random < 0.15) return '可疑';
-            return '安全';
-        }
 
         // 开始分析
         async function startAnalysis() {
             if (isAnalyzing) return;
-            
+
+            if (!sourceData || !sourceData.Sheet1 || sourceData.Sheet1.length === 0) {
+                alert('⚠️ 请先上传包含URL数据的文件');
+                addLog('无法开始分析：未加载数据', 'warning');
+                return;
+            }
+
             isAnalyzing = true;
-            isPaused = false;
             startTime = Date.now();
-            
+
             document.getElementById('startBtn').disabled = true;
-            document.getElementById('pauseBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = false;
-            
-            const limit = parseInt(document.getElementById('limitInput').value) || 100;
-            const concurrent = parseInt(document.getElementById('concurrentInput').value) || 3;
-            
-            addLog(`开始分析，目标: ${limit} 个URL，并发数: ${concurrent}`, 'info');
-            
-            const urls = sourceData.Sheet1.slice(0, limit).map(item => item['提取页面url']);
+
+            const concurrent = parseInt(document.getElementById('concurrentInput').value) || 6;
+
+            // 分析所有数据
+            const urlColumn = sourceData.urlColumn || 'url';
+            const urls = sourceData.Sheet1.map(item => item.url || item[urlColumn]);
             const total = urls.length;
-            
+
+            addLog(`开始分析全部数据，共 ${total} 个URL，并发数: ${concurrent}`, 'info');
+
             // 批量分析
             for (let i = 0; i < total; i += concurrent) {
                 if (!isAnalyzing) break;
-                
-                while (isPaused) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
+
                 const batch = urls.slice(i, i + concurrent);
                 const promises = batch.map((url, idx) => analyzeUrl(url, i + idx));
-                
+
                 try {
                     const results = await Promise.all(promises);
                     analyzedResults.push(...results);
-                    
+
                     // 更新UI
                     updateStats();
                     updateProgress(analyzedResults.length, total);
                     updateTable();
-                    updateCharts();
-                    
+                    updateChartsData();
+
                     addLog(`已完成 ${analyzedResults.length}/${total}`, 'success');
                 } catch (error) {
+                    console.error('Error analyzing URL:', error);
                     addLog(`批次分析出错: ${error.message}`, 'error');
                 }
             }
-            
+
             if (isAnalyzing) {
-                addLog('分析完成！', 'success');
-                stopAnalysis();
+                addLog('✅ 全部分析完成！', 'success');
+                isAnalyzing = false;
+                document.getElementById('startBtn').disabled = false;
             }
-        }
-
-        // 暂停分析
-        function pauseAnalysis() {
-            isPaused = !isPaused;
-            const btn = document.getElementById('pauseBtn');
-            if (isPaused) {
-                btn.innerHTML = '<span>▶️</span> 继续';
-                addLog('分析已暂停', 'warning');
-            } else {
-                btn.innerHTML = '<span>⏸️</span> 暂停';
-                addLog('分析继续中...', 'info');
-            }
-        }
-
-        // 停止分析
-        function stopAnalysis() {
-            isAnalyzing = false;
-            isPaused = false;
-            
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('pauseBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('pauseBtn').innerHTML = '<span>⏸️</span> 暂停';
         }
 
         // 更新统计
@@ -780,7 +764,7 @@
             const total = analyzedResults.length;
             const riskCount = analyzedResults.filter(r => r.risk === '高风险').length;
             const safeCount = analyzedResults.filter(r => r.risk === '安全').length;
-            
+
             document.getElementById('analyzedUrls').textContent = total;
             document.getElementById('riskUrls').textContent = riskCount;
             document.getElementById('safeUrls').textContent = safeCount;
@@ -792,10 +776,10 @@
             const progressBar = document.getElementById('progressBar');
             progressBar.style.width = percentage + '%';
             progressBar.textContent = percentage + '%';
-            
+
             const elapsed = (Date.now() - startTime) / 1000;
             const speed = (current / elapsed).toFixed(2);
-            
+
             document.getElementById('progressText').textContent = `已分析 ${current}/${total} 个URL`;
             document.getElementById('speedText').textContent = `速度: ${speed} URL/s`;
         }
@@ -804,7 +788,7 @@
         function updateTable() {
             const tbody = document.getElementById('resultsTableBody');
             const lastResults = analyzedResults.slice(-10).reverse();
-            
+
             tbody.innerHTML = lastResults.map(result => `
                 <tr>
                     <td>${result.index}</td>
@@ -824,31 +808,11 @@
             `).join('');
         }
 
-        // 更新图表
-        function updateCharts() {
-            // 行业分布
-            const industryCount = {};
-            analyzedResults.forEach(result => {
-                industryCount[result.industry] = (industryCount[result.industry] || 0) + 1;
-            });
-            
-            const industryData = Object.entries(industryCount).map(([name, value]) => ({
-                name, value
-            }));
-            
-            window.industryChart.setOption({
-                series: [{ data: industryData }]
-            });
-            
-            // 风险分布
-            const riskCount = { '安全': 0, '可疑': 0, '高风险': 0, '未知': 0 };
-            analyzedResults.forEach(result => {
-                riskCount[result.risk] = (riskCount[result.risk] || 0) + 1;
-            });
-            
-            window.riskChart.setOption({
-                series: [{ data: Object.values(riskCount) }]
-            });
+        // 更新图表数据
+        function updateChartsData() {
+            if (charts) {
+                updateCharts(charts, analyzedResults);
+            }
         }
 
         // 导出报告
@@ -857,74 +821,23 @@
                 alert('暂无数据可导出');
                 return;
             }
-            
+
             const csv = convertToCSV(analyzedResults);
             downloadCSV(csv, 'url_analysis_report.csv');
             addLog('报告导出成功', 'success');
         }
 
-        // 转换为CSV
-        function convertToCSV(data) {
-            const headers = ['序号', 'URL', '标题', '关键词', '描述', '网站摘要', '行业分类', '风险评估'];
-            const rows = data.map(row => [
-                row.index,
-                row.url,
-                row.title,
-                row.keywords,
-                row.description,
-                row.summary,
-                row.industry,
-                row.risk
-            ]);
-            
-            return [headers, ...rows].map(row => 
-                row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-            ).join('\n');
-        }
-
-        // 下载CSV
-        function downloadCSV(csv, filename) {
-            const BOM = '\uFEFF';
-            const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-        }
-
-        // 添加日志
-        function addLog(message, type = 'info') {
-            const container = document.getElementById('logContainer');
-            const time = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = `log-entry log-${type}`;
-            entry.textContent = `[${time}] ${message}`;
-            container.appendChild(entry);
-            container.scrollTop = container.scrollHeight;
-            
-            // 限制日志数量
-            if (container.children.length > 100) {
-                container.removeChild(container.firstChild);
-            }
-        }
-
         // 事件监听
-        document.getElementById('startBtn').addEventListener('click', startAnalysis);
-        document.getElementById('pauseBtn').addEventListener('click', pauseAnalysis);
-        document.getElementById('stopBtn').addEventListener('click', () => {
-            stopAnalysis();
-            addLog('分析已停止', 'warning');
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
         });
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('startBtn').addEventListener('click', startAnalysis);
         document.getElementById('exportBtn').addEventListener('click', exportReport);
 
         // 页面加载完成后初始化
         window.addEventListener('load', init);
     </script>
 </body>
+
 </html>
-
-
-
-
-
-

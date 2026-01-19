@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { transportStream } from "../transport";
-import { addConversation, composerMap, getConversation, getReqChatExample, getReqToolImgExample, getReqToolWebExample } from "./request";
+import { addConversation, composerMap, getConversation, getReqChatExample, getReqToolImgExample, getReqToolWebExample, getReqToolWebSearch } from "./request";
 import { _tt, k7e, tools, Ur } from "../service/common";
 import { v4 } from "uuid";
 import { base64ToUint8ArrayInNode } from "@/utils/file";
@@ -99,6 +99,7 @@ export async function GET(request: Request) {
           };
 
           const doRes =  async (res: any) => {
+            let web_search = false;
             for await (const chunk of res.message) {
               // 检查客户端是否已断开或流是否已关闭
               if (request.signal.aborted || isClosed) {
@@ -119,13 +120,16 @@ export async function GET(request: Request) {
                 ) {
                   const partialToolCall = chunk.response.value.partialToolCall;
                   const tool = tools.find(({no}) => no === partialToolCall.tool )?.name;
-
+                
                   
-                  if (tool === 'CLIENT_SIDE_TOOL_V2_WEB_SEARCH') {
-                    queue.push(new _tt({ request: getReqToolWebExample(partialToolCall.tool, partialToolCall.toolCallId) }));  
+                  if (tool === "CLIENT_SIDE_TOOL_V2_WEB_SEARCH") {
+                    queue.push(new _tt({ request: getReqToolWebExample(partialToolCall.tool, partialToolCall.toolCallId, web_search) }));  
                   } else if (tool === 'CLIENT_SIDE_TOOL_V2_EDIT_FILE_V2') {
                     queue.push(new _tt({ request: getReqToolImgExample(partialToolCall.tool, partialToolCall.toolCallId) }));  
                   }
+              } else if (chunk.response.value?.name  === 'web_search') {
+                queue.push(new _tt({ request: getReqToolWebSearch(chunk.response.value) }));  
+                web_search = true;
               }
 
               if (chunk.response?.value?.text) {
