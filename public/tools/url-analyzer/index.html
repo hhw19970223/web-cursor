@@ -650,9 +650,9 @@
 
             // 模拟提取数据
             const domain = extractDomain(url);
-            let title = `${domain} - 网站标题`;
+            let title = ``;
             let keywords = '';
-            let description = `这是 ${domain} 的网站描述，提供各种服务...`;
+            let description = ``;
             let h1 = '';
             let h2 = '';
             let h3 = '';
@@ -661,7 +661,7 @@
 
             let summary = generateSummary(url, keywords);
             let industry = classifyIndustry(url, keywords, title, description, industryKeywords);
-            let risk = assessRisk(url, keywords, title, description, riskKeywords);
+            let risk = '未知';
 
             const text = `请分析以下网站信息并返回JSON格式的分析结果：
 
@@ -755,8 +755,8 @@
                 summary,
                 industry,
                 risk,
-                why: why || '无风险或未检测到风险特征',
-                status: 'completed',
+                why: why || '',
+                status: flag ? 'completed' : 'pending',
                 h1,
                 h2,
                 h3
@@ -930,7 +930,7 @@
                         </span>
                     </td>
                     <td style="min-width: 100px;" title="${result.why || '无风险或未检测到风险特征'}">${result.why || '无风险或未检测到风险特征'}</td>
-                    <td style="min-width: 80px;">✅ 完成</td>
+                    <td style="min-width: 80px;">${result.status === 'completed' ? '✅ 完成' : '⏳ 分析失败'}</td>
                     <td style="min-width: 100px;" title="${result.title}">${result.title}</td>
                     <td style="min-width: 100px;" title="${result.keywords}">${result.keywords}</td>
                     <td style="min-width: 100px;" title="${result.description}">${result.description}</td>

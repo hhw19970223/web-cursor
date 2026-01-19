@@ -14,6 +14,11 @@ const page = () => {
       type: "1",
       link: "/generated-chart",
     },
+    {
+      title: "url智能分析",
+      type: "2",
+      link: "/url-analyzer",
+    },
   ];
 
   return (
