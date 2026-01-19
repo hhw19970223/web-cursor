@@ -164,7 +164,9 @@ async function cursorMessageStream(options) {
           if (streamUnifiedChatResponse.toolCall) {
             const toolCall = streamUnifiedChatResponse.toolCall;
             if ('CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2' === toolCall.tool) {
+          
               resolvePromise(null);
+              close();
             }
             if (toolCall.rawArgs) {
               try {
