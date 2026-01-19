@@ -66,7 +66,6 @@ export async function GET(request: Request) {
 
         // 客户端断开时清理
         const abortHandler = () => {
-          console.log('Client disconnected, cleaning up...');
           safeClose();
           // 如果有 gRPC 流的取消方法，在这里调用
         };
@@ -103,7 +102,6 @@ export async function GET(request: Request) {
             for await (const chunk of res.message) {
               // 检查客户端是否已断开或流是否已关闭
               if (request.signal.aborted || isClosed) {
-                console.log('Stream interrupted, stopping...');
                 break;
               }
           
