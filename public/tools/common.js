@@ -217,12 +217,7 @@ async function cursorMessageStream(options) {
       }
       // reject Promise，结束阻塞
       if (rejectPromise) {
-        resolvePromise({
-          code,
-          message: messageText,
-          composerId,
-          error: err
-        });
+        resolvePromise(null);
       }
     };
 
