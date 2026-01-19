@@ -281,6 +281,11 @@
             color: #991b1b;
         }
 
+        .badge-risk2 {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
         .badge-unknown {
             background: #e5e7eb;
             color: #374151;
@@ -920,7 +925,7 @@
                     <td title="${result.summary}">${result.summary}</td>
                     <td style="min-width: 100px;"><strong>${result.industry}</strong></td>
                     <td style="min-width: 80px;">
-                        <span class="badge ${result.risk === '安全' ? 'badge-safe' : result.risk === '高风险' ? 'badge-risk' : 'badge-unknown'}">
+                        <span class="badge ${result.risk === '安全' ? 'badge-safe' : result.risk === '高风险' ? 'badge-risk' : result.risk === '可疑' ? 'badge-risk2' : 'badge-unknown'}">
                             ${result.risk}
                         </span>
                     </td>
