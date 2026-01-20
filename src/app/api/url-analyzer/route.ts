@@ -39,7 +39,6 @@ export async function POST(request: Request) {
 4. 评估网站风险等级，判断是否涉及色情、赌博或其他灰色产业，风险等级分为：高风险、可疑、安全
 5. 说明风险评估的具体原因
 6. 严格帮我生成以下固定格式的json数据
-7. 直接给我返回结果，而不是告诉我怎么实现
 
 **important**: 请不要使用CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2工具
 
@@ -271,6 +270,9 @@ async function cursorMessageStream(options: any) {
         try {
           const jsonStr = line.substring(6); // 移除 "data: " 前缀
           const data = JSON.parse(jsonStr);
+
+          console.log('--------------------------->')
+          console.log(data)
 
           if (data?.message?.streamUnifiedChatResponse) {
             const streamUnifiedChatResponse =
