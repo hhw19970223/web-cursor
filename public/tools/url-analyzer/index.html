@@ -1043,6 +1043,13 @@
             const urlData = sourceData.Sheet1; // 保留完整数据对象，包含count字段
             const total = urlData.length;
             analyzedResults.length = 0;
+            
+
+            // 批量更新UI
+            updateStats();
+            updateProgress(analyzedResults.length, total);
+            updateTable();
+            updateChartsData();
 
             addLog(`开始分析全部数据，共 ${total} 个唯一URL，并发数: ${concurrent}`, 'info');
 
