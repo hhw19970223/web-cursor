@@ -149,6 +149,125 @@
             width: 150px;
         }
 
+        select {
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        select:hover {
+            border-color: #667eea;
+        }
+
+        select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* 复选框过滤器样式 */
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .filter-action-btn {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #666;
+        }
+
+        .filter-action-btn:hover {
+            background: #f9fafb;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .filter-checkbox {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .filter-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-checkbox:hover .filter-checkbox-label {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .filter-checkbox input[type="checkbox"]:checked + .filter-checkbox-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-checkbox-icon {
+            font-size: 16px;
+        }
+
+        /* 不同风险等级的颜色标识 */
+        .filter-checkbox.risk-safe input[type="checkbox"]:checked + .filter-checkbox-label {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+        }
+
+        .filter-checkbox.risk-suspicious input[type="checkbox"]:checked + .filter-checkbox-label {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #f59e0b;
+        }
+
+        .filter-checkbox.risk-high input[type="checkbox"]:checked + .filter-checkbox-label {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-color: #ef4444;
+        }
+
+        .filter-checkbox.risk-unknown input[type="checkbox"]:checked + .filter-checkbox-label {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            border-color: #6b7280;
+        }
+
         .progress-section {
             background: white;
             border-radius: 20px;
@@ -187,7 +306,7 @@
 
         .charts-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(1000px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -407,6 +526,14 @@
                 </button>
                 <span id="fileNameDisplay" style="color: #666; font-size: 14px;">未选择文件</span>
             </div>
+            <div class="control-group" style="margin-top: 15px;">
+                <input type="file" id="historyFileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+                <button class="btn btn-success" id="uploadHistoryBtn">
+                    <span>📥</span> 导入历史分析结果
+                </button>
+                <span id="historyFileNameDisplay" style="color: #666; font-size: 14px;">未选择历史文件</span>
+                <span id="historyCountDisplay" style="color: #10b981; font-size: 14px; font-weight: 600; margin-left: 10px;"></span>
+            </div>
         </div>
 
         <!-- 控制面板 -->
@@ -420,10 +547,10 @@
                     <span>📥</span> 导出分析数据
                 </button>
 
-                <div class="input-group">
+                <!-- <div class="input-group">
                     <label>并发数:</label>
                     <input type="number" id="concurrentInput" value="6" min="1" max="20">
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -446,7 +573,43 @@
         <!-- 图表展示 -->
         <div class="charts-row">
             <div class="chart-card">
-                <div class="chart-title">📊 行业分类分布</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                    <div class="chart-title" style="margin-bottom: 0;">📊 行业分类分布</div>
+                    <div class="filter-group">
+                        <label class="filter-checkbox risk-safe">
+                            <input type="checkbox" class="industry-risk-filter" value="安全" checked>
+                            <span class="filter-checkbox-label">
+                                <span class="filter-checkbox-icon">✅</span>
+                                <span>安全</span>
+                            </span>
+                        </label>
+                        <label class="filter-checkbox risk-suspicious">
+                            <input type="checkbox" class="industry-risk-filter" value="可疑" checked>
+                            <span class="filter-checkbox-label">
+                                <span class="filter-checkbox-icon">⚠️</span>
+                                <span>可疑</span>
+                            </span>
+                        </label>
+                        <label class="filter-checkbox risk-high">
+                            <input type="checkbox" class="industry-risk-filter" value="高风险" checked>
+                            <span class="filter-checkbox-label">
+                                <span class="filter-checkbox-icon">🚫</span>
+                                <span>高风险</span>
+                            </span>
+                        </label>
+                        <label class="filter-checkbox risk-unknown">
+                            <input type="checkbox" class="industry-risk-filter" value="未知" checked>
+                            <span class="filter-checkbox-label">
+                                <span class="filter-checkbox-icon">❓</span>
+                                <span>未知</span>
+                            </span>
+                        </label>
+                        <div class="filter-actions">
+                            <button class="filter-action-btn" id="selectAllRisks">全选</button>
+                            <button class="filter-action-btn" id="deselectAllRisks">清空</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="chart-container" id="industryChart"></div>
             </div>
             <div class="chart-card">
@@ -462,7 +625,7 @@
                 <table id="resultsTable">
                     <thead>
                         <tr>
-                            <th>序号</th>
+                            <!-- <th>序号</th> -->
                             <th>URL</th>
                             <th>数量</th>
                             <th>网站摘要</th>
@@ -495,6 +658,7 @@
         // 全局变量
         let sourceData = null;
         let analyzedResults = [];
+        let historyResults = new Map(); // 存储历史分析结果，key为URL，value为分析数据
         let isAnalyzing = false;
         let currentIndex = 0;
         let startTime = 0;
@@ -642,130 +806,178 @@
             reader.readAsArrayBuffer(file);
         }
 
+        // 处理历史文件上传
+        function handleHistoryFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        //         // 模拟URL分析
-        //         async function analyzeUrl(url, index, count = 1) {
-        //             // 模拟网络请求延迟
-        //             await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+            // 显示文件名
+            document.getElementById('historyFileNameDisplay').textContent = `已选择: ${file.name}`;
+            addLog(`正在解析历史分析文件: ${file.name}`, 'info');
 
-        //             // 模拟提取数据
-        //             const domain = extractDomain(url);
-        //             let title = ``;
-        //             let keywords = '';
-        //             let description = `这是 ${domain} 的网站描述，提供各种服务...`;
-        //             let h1 = '';
-        //             let h2 = '';
-        //             let h3 = '';
-        //             let flag = false;
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // 获取第一个工作表
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    // 转换为JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (!jsonData || jsonData.length === 0) {
+                        showError('历史文件解析失败：文件为空或格式不正确', 'history');
+                        addLog('历史文件解析失败：文件内容为空', 'error');
+                        return;
+                    }
+
+                    // 查找URL列
+                    const urlColumn = findUrlColumn(jsonData[0]);
+
+                    if (!urlColumn) {
+                        showError('历史文件解析失败：未找到URL列', 'history');
+                        addLog('历史文件解析失败：未找到URL列', 'error');
+                        return;
+                    }
+
+                    // 提取历史分析结果，过滤掉status为"未知"或risk为"未知"的数据
+                    let importedCount = 0;
+                    let filteredCount = 0;
+
+                    jsonData.forEach((row) => {
+                        const url = row[urlColumn] || row['URL'];
+                        const risk = row['风险评估'] || row['risk'] || '';
+                        const status = row['状态'] || row['status'] || '';
+
+                        // 过滤掉status为"未知"或risk为"未知"的数据
+                        if (risk === '未知' || status === '未知' || risk.includes('未知')) {
+                            filteredCount++;
+                            return;
+                        }
+
+                        if (url && String(url).trim()) {
+                            const trimmedUrl = String(url).trim();
+                            
+                            // 保存历史分析结果
+                            historyResults.set(trimmedUrl, {
+                                url: trimmedUrl,
+                                count: row['数量'] || row['count'] || 1,
+                                title: row['标题'] || row['title'] || '',
+                                keywords: row['关键词'] || row['keywords'] || '',
+                                description: row['描述'] || row['description'] || '',
+                                summary: row['网站摘要'] || row['summary'] || '',
+                                industry: row['行业分类'] || row['industry'] || '其他',
+                                risk: risk,
+                                why: row['风险原因'] || row['为什么'] || row['why'] || '',
+                                status: 'completed',
+                                h1: row['h1'] || '',
+                                h2: row['h2'] || '',
+                                h3: row['h3'] || ''
+                            });
+                            importedCount++;
+                        }
+                    });
+
+                    if (historyResults.size === 0) {
+                        showError('历史文件导入失败：没有有效的历史数据\n（已过滤掉所有status为"未知"的记录）', 'history');
+                        addLog('历史文件导入失败：没有有效的历史数据', 'error');
+                        return;
+                    }
+
+                    // 显示成功信息
+                    let logMessage = `历史文件导入成功！共导入 ${importedCount} 条有效历史记录`;
+                    if (filteredCount > 0) {
+                        logMessage += `（已过滤 ${filteredCount} 条status为"未知"的记录）`;
+                    }
+                    addLog(logMessage, 'success');
+                    addLog(`历史记录将在分析时自动使用，跳过重复分析`, 'info');
+
+                    // 更新显示
+                    document.getElementById('historyCountDisplay').textContent = `✅ 已导入 ${historyResults.size} 条历史记录`;
+
+                    // 将历史数据添加到analyzedResults进行展示
+                    let index = analyzedResults.length;
+                    for (const [url, historyData] of historyResults.entries()) {
+                        // 检查是否已经存在于analyzedResults中（避免重复）
+                        const existingIndex = analyzedResults.findIndex(r => r.url === url);
+                        if (existingIndex === -1) {
+                            analyzedResults.push({
+                                index: index + 1,
+                                url: url,
+                                count: historyData.count || 1,
+                                title: historyData.title || '',
+                                keywords: historyData.keywords || '',
+                                description: historyData.description || '',
+                                summary: historyData.summary || '',
+                                industry: historyData.industry || '其他',
+                                risk: historyData.risk || '未知',
+                                why: historyData.why || '',
+                                status: 'completed',
+                                h1: historyData.h1 || '',
+                                h2: historyData.h2 || '',
+                                h3: historyData.h3 || ''
+                            });
+                            index++;
+                        }
+                    }
+
+                    // 更新UI显示
+                    updateStats();
+                    updateTable();
+                    updateChartsData();
+                    
+                    // 更新总URL数量统计
+                    const currentTotal = parseInt(document.getElementById('totalUrls').textContent.replace(/,/g, '')) || 0;
+                    const newTotal = Math.max(currentTotal, analyzedResults.length);
+                    document.getElementById('totalUrls').textContent = newTotal.toLocaleString();
+                    
+                    addLog(`已将 ${historyResults.size} 条历史记录加载到分析结果中`, 'success');
+
+                } catch (error) {
+                    showError('历史文件解析失败：' + error.message, 'history');
+                    addLog(`历史文件解析错误: ${error.message}`, 'error');
+                    console.error('History file parse error:', error);
+                }
+            };
+
+            reader.onerror = function () {
+                showError('历史文件读取失败：无法读取文件', 'history');
+                addLog('历史文件读取失败', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 清空历史记录
+        function clearHistoryRecords() {
+            if (!historyResults || historyResults.size === 0) {
+                addLog('没有历史记录需要清空', 'warning');
+                return;
+            }
+
+            const count = historyResults.size;
+            
+            // 确认清空
+            if (!confirm(`确定要清空 ${count} 条历史记录吗？\n\n注意：这不会影响当前已分析的结果，只会清空历史记录缓存。`)) {
+                return;
+            }
+
+            // 清空历史记录
+            historyResults.clear();
+            
+            // 更新UI
+            document.getElementById('historyFileNameDisplay').textContent = '未选择历史文件';
+            document.getElementById('historyCountDisplay').textContent = '';
+            document.getElementById('historyFileInput').value = '';
+            
+            addLog(`已清空 ${count} 条历史记录`, 'success');
+        }
 
 
-        //             let summary = '';
-        //             let industry = '';
-        //             let risk = '未知';
-
-        //             const text = `请分析以下网站信息并返回JSON格式的分析结果：
-
-        // 网站URL: ${url}
-
-        // 请完成以下任务：
-        // 1. 访问并分析该网站的内容和特征，并且记录下网站头部信息的title，keywords和description
-        // 2. 根据提供的标题、关键词和描述，生成一句话的网站总结（100字以内）
-        // 3. 判断网站所属行业类别（从以下选项中选择最合适的一个）：电子商务、金融服务、科技/IT、教育培训、医疗健康、房地产、汽车、媒体/娱乐、社交网络、餐饮美食、旅游、企业服务、赌博、其他
-        // 4. 评估网站风险等级，判断是否涉及色情、赌博或其他灰色产业，风险等级分为：高风险、可疑、安全
-        // 5. 说明风险评估的具体原因
-        // 6. 帮我生成以下固定格式的json数据
-
-        // **important**: 请不要使用CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2工具
-
-        // **重要：请严格按照以下JSON格式，不要包含任何其他文字说明：**
-
-        // {
-        //   "summary": "对网站的总结描述（100字以内）",
-        //   "industry": "所属行业分类",
-        //   "risk": "风险等级（高风险/可疑/安全）",
-        //   "why": "风险评估等级的原因说明"，
-        //   "description": "网站描述"
-        //   "keywords": "关键词"
-        //   "title": "标题"
-        // }`
-
-        //             try {
-        //                 const stream = await cursorMessageStream({
-        //                     prompt: text,
-        //                 });
-
-        //                 let result = await stream.wait(); // 阻塞
-
-        //                 if (!result) {
-        //                     const stream = await cursorMessageStream({
-        //                         prompt: text,
-        //                     });
-        //                     result = await stream.wait(); // 阻塞
-        //                     if (!result) {
-        //                         const stream = await cursorMessageStream({
-        //                             prompt: text,
-        //                         });
-        //                         result = await stream.wait(); // 阻塞
-        //                     }
-        //                 }
-
-        //                 try {
-        //                     const json = JSON.parse(result.code);
-        //                     summary = json.summary || '';
-        //                     industry = json.industry || '';
-        //                     risk = json.risk || '';
-        //                     why = json.why || '';
-        //                     description = json.description || '';
-        //                     keywords = json.keywords || '';
-        //                     title = json.title || '';
-        //                     flag = true;
-        //                 } catch (e) {
-        //                     console.error('Error analyzing URL:', result.code);
-        //                 }
-        //             } catch (e) {
-        //                 console.error('Error analyzing URL:', e);
-        //             }
-
-        //             try {
-        //                 if (!flag) {
-        //                     const result = await fetch('/api/url', {
-        //                         method: 'POST',
-        //                         body: JSON.stringify({
-        //                             url,
-        //                         }),
-        //                     })
-        //                         .then((res) => res.json())
-
-        //                     title = result.title || '';
-        //                     keywords = result.keywords || '';
-        //                     description = result.description || '';
-        //                     h1 = result.h1?.join('|||') || '';
-        //                     h2 = result.h2?.join('|||') || '';
-        //                     h3 = result.h3?.join('|||') || '';
-        //                 }
-
-        //             } catch (error) {
-        //                 console.error('Error analyzing URL:', error);
-        //             }
-
-
-        //             return {
-        //                 index: index + 1,
-        //                 url,
-        //                 count, // 保留数量字段
-        //                 title,
-        //                 keywords,
-        //                 description,
-        //                 summary,
-        //                 industry,
-        //                 risk,
-        //                 why: why || '',
-        //                 status: flag ? 'completed' : 'pending',
-        //                 h1,
-        //                 h2,
-        //                 h3
-        //             };
-        //         }
 
         // URLS分析
         async function analyzeUrl(urls) {
@@ -797,6 +1009,11 @@
             }
         }
 
+        // 从历史记录中获取URL分析结果
+        function getHistoryResult(url) {
+            return historyResults.get(url);
+        }
+
         // 开始分析
         async function startAnalysis() {
             if (isAnalyzing) return;
@@ -819,7 +1036,7 @@
 
             document.getElementById('startBtn').disabled = true;
 
-            const concurrent = parseInt(document.getElementById('concurrentInput').value) || 6;
+            const concurrent = 6;
 
             // 分析所有数据
             const urlColumn = sourceData.urlColumn || 'url';
@@ -852,111 +1069,133 @@
 
                 // 添加批次任务到队列（不等待）
                 taskQueue.add(async () => {
-                    const urls = batch.data.map(item => item.url || item[urlColumn]);
+                    // 检查哪些URL在历史记录中
+                    const urlsToAnalyze = [];
+                    const historyUrls = [];
 
-                    addLog(`正在分析批次: ${batch.startIndex + 1} - ${batch.startIndex + urls.length}`, 'info');
-
-                    try {
-                        // 调用API分析这一批URL
-                        let result = await analyzeUrl(urls);
-
-                        // 检查返回结果
-                        if (!result.success || !result.data) {
-                            result = await analyzeUrl(urls);//再试一次
-                            if (!result.success || !result.data) {
-                                throw new Error('API返回数据格式错误');
-                                result = await analyzeUrl(urls);//再试一次
-                            }
+                    for (const item of batch.data) {
+                        const url = item.url || item[urlColumn];
+                        const historyResult = getHistoryResult(url);
+                        
+                        if (historyResult) {
+                            // 使用历史记录
+                            historyUrls.push({
+                                url: url,
+                                item: item,
+                                historyData: historyResult
+                            });
+                        } else {
+                            // 需要分析
+                            urlsToAnalyze.push({
+                                url: url,
+                                item: item
+                            });
                         }
+                    }
 
-                        // 处理每个URL的结果
-                        for (let i = 0; i < batch.data.length; i++) {
-                            const item = batch.data[i];
-                            const url = item.url || item[urlColumn];
-                            const count = item.count || 1;
-                            const index = batch.startIndex + i;
+                    // 如果有需要分析的URL
+                    if (urlsToAnalyze.length > 0) {
+                        const urls = urlsToAnalyze.map(item => item.url);
 
-                            const data = result.data[url];
+                        addLog(`正在分析批次: ${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}（新分析 ${urlsToAnalyze.length} 个，历史记录 ${historyUrls.length} 个）`, 'info');
 
-                            let urlResult;
-                            if (!data || data.error) {
-                                // 处理错误情况
-                                urlResult = {
+                        try {
+                            // 调用API分析这一批URL
+                            let result = await analyzeUrl(urls);
+
+                            // 检查返回结果
+                            if (!result.success || !result.data) {
+                                result = await analyzeUrl(urls);//再试一次
+                                if (!result.success || !result.data) {
+                                    throw new Error('API返回数据格式错误');
+                                    result = await analyzeUrl(urls);//再试一次
+                                }
+                            }
+
+                            // 处理每个URL的结果
+                            for (const {url, item} of urlsToAnalyze) {
+                                const count = item.count || 1;
+                                const index = batch.startIndex + batch.data.indexOf(item);
+
+                                const data = result.data[url];
+
+                                let urlResult;
+                                if (!data || data.error) {
+                                    // 处理错误情况
+                                    urlResult = {
+                                        index: index + 1,
+                                        url,
+                                        count,
+                                        title: '',
+                                        keywords: '',
+                                        description: '',
+                                        summary: '',
+                                        industry: '未知',
+                                        risk: '未知',
+                                        why: data?.error || '未知错误',
+                                        status: '分析失败'
+                                    };
+                                } else {
+                                    // 处理成功情况
+                                    urlResult = {
+                                        index: index + 1,
+                                        url,
+                                        count,
+                                        title: data.title || '',
+                                        keywords: data.keywords || '',
+                                        description: data.description || '',
+                                        summary: data.summary || '',
+                                        industry: data.industry || '其他',
+                                        risk: data.risk || '未知',
+                                        why: data.why || '',
+                                        status: 'completed'
+                                    };
+                                }
+
+                                analyzedResults.push(urlResult);
+                            }
+
+                        } catch (error) {
+                            console.error('批次分析出错:', error);
+                            addLog(`批次分析失败 (${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}): ${error.message}`, 'error');
+
+                            // 即使失败也要记录错误结果
+                            for (const {url, item} of urlsToAnalyze) {
+                                const count = item.count || 1;
+                                const index = batch.startIndex + batch.data.indexOf(item);
+
+                                analyzedResults.push({
                                     index: index + 1,
                                     url,
                                     count,
                                     title: '',
                                     keywords: '',
                                     description: '',
-                                    summary: '',
+                                    summary: '批次分析失败',
                                     industry: '未知',
                                     risk: '未知',
-                                    why: data?.error || '未知错误',
-                                    status: '分析失败'
-                                };
-                            } else {
-                                // 处理成功情况
-                                urlResult = {
-                                    index: index + 1,
-                                    url,
-                                    count,
-                                    title: data.title || '',
-                                    keywords: data.keywords || '',
-                                    description: data.description || '',
-                                    summary: data.summary || '',
-                                    industry: data.industry || '其他',
-                                    risk: data.risk || '未知',
-                                    why: data.why || '',
-                                    status: 'completed'
-                                };
+                                    why: error.message,
+                                    status: 'error'
+                                });
                             }
-
-                            analyzedResults.push(urlResult);
                         }
-
-                        // 批量更新UI
-                        updateStats();
-                        updateProgress(analyzedResults.length, total);
-                        updateTable();
-                        updateChartsData();
-
-                        addLog(`批次完成: ${batch.startIndex + 1} - ${batch.startIndex + urls.length}，总进度 ${analyzedResults.length}/${total}`, 'success');
-
-                        return urls.length;
-                    } catch (error) {
-                        console.error('批次分析出错:', error);
-                        addLog(`批次分析失败 (${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}): ${error.message}`, 'error');
-
-                        // 即使失败也要记录错误结果
-                        for (let i = 0; i < batch.data.length; i++) {
-                            const item = batch.data[i];
-                            const url = item.url || item[urlColumn];
-                            const count = item.count || 1;
-                            const index = batch.startIndex + i;
-
-                            analyzedResults.push({
-                                index: index + 1,
-                                url,
-                                count,
-                                title: '',
-                                keywords: '',
-                                description: '',
-                                summary: '批次分析失败',
-                                industry: '未知',
-                                risk: '未知',
-                                why: error.message,
-                                status: 'error'
-                            });
-                        }
-
-                        // 更新UI
-                        updateStats();
-                        updateProgress(analyzedResults.length, total);
-                        updateTable();
-                        updateChartsData();
-
-                        throw error;
+                    } else {
+                        // 全部从历史记录获取，不需要API分析
+                        addLog(`批次完成（全部来自历史记录）: ${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}`, 'success');
                     }
+
+                    // 批量更新UI
+                    updateStats();
+                    updateProgress(analyzedResults.length, total);
+                    updateTable();
+                    updateChartsData();
+
+                    if (urlsToAnalyze.length > 0) {
+                        addLog(`批次完成: ${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}，总进度 ${analyzedResults.length}/${total}`, 'success');
+                    }
+
+                    return batch.data.length;
+
                 }).catch(error => {
                     console.error('Error in batch task:', error);
                 });
@@ -1007,11 +1246,27 @@
         function updateTable() {
             const tbody = document.getElementById('resultsTableBody');
 
+            // 定义风险等级的排序优先级（数字越小优先级越高）
+            const riskPriority = {
+                '高风险': 1,
+                '可疑': 2,
+                '未知': 3,
+                '安全': 4
+            };
 
-            tbody.innerHTML = analyzedResults.filter(r => r?.risk !== '安全').map(result => `
+            // 过滤并排序：先过滤掉安全，然后按风险等级排序
+            const filteredAndSorted = analyzedResults
+                .filter(r => r?.risk !== '安全')
+                .sort((a, b) => {
+                    // 按风险等级排序
+                    const priorityA = riskPriority[a.risk] || 999;
+                    const priorityB = riskPriority[b.risk] || 999;
+                    return priorityA - priorityB;
+                });
+
+            tbody.innerHTML = filteredAndSorted.map(result => `
                 <tr>
-                    <td style="min-width: 50px;">${result.index}</td>
-                    <td style="min-width: 100px;" title="${result.url}">${result.url}</td>
+                    <td style="min-width: 150px;" title="${result.url}">${result.url}</td>
                     <td style="min-width: 60px; text-align: center;"><strong>${result.count || 1}</strong></td>
                     
                     <td title="${result.summary}">${result.summary}</td>
@@ -1021,7 +1276,7 @@
                             ${result.risk}
                         </span>
                     </td>
-                    <td style="min-width: 100px;" title="${result.why || '无风险或未检测到风险特征'}">${result.why || '无风险或未检测到风险特征'}</td>
+                    <td style="min-width: 150px;" title="${result.why || '无风险或未检测到风险特征'}">${result.why || '无风险或未检测到风险特征'}</td>
                     <td style="min-width: 80px;">${result.status === 'completed' ? '✅ 完成' : '⏳ 分析失败'}</td>
                     <td style="min-width: 100px;" title="${result.title}">${result.title}</td>
                     <td style="min-width: 100px;" title="${result.keywords}">${result.keywords}</td>
@@ -1033,7 +1288,12 @@
         // 更新图表数据
         function updateChartsData() {
             if (charts) {
-                updateCharts(charts, analyzedResults);
+                // 获取所有选中的风险等级
+                const selectedRisks = Array.from(
+                    document.querySelectorAll('.industry-risk-filter:checked')
+                ).map(checkbox => checkbox.value);
+                
+                updateCharts(charts, analyzedResults, selectedRisks);
             }
         }
 
@@ -1053,8 +1313,63 @@
             document.getElementById('fileInput').click();
         });
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('uploadHistoryBtn').addEventListener('click', () => {
+            document.getElementById('historyFileInput').click();
+        });
+        document.getElementById('historyFileInput').addEventListener('change', handleHistoryFileUpload);
         document.getElementById('startBtn').addEventListener('click', startAnalysis);
         document.getElementById('exportBtn').addEventListener('click', exportReport);
+        
+        // 行业分布过滤器事件监听（复选框）
+        document.querySelectorAll('.industry-risk-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const selectedRisks = Array.from(
+                    document.querySelectorAll('.industry-risk-filter:checked')
+                ).map(cb => cb.value);
+                
+                if (selectedRisks.length === 0) {
+                    // 如果全部取消选中，显示提示并自动选中当前点击的
+                    e.target.checked = true;
+                    addLog('至少需要选择一个风险等级', 'warning');
+                    return;
+                }
+                
+                const riskText = selectedRisks.join('、');
+                addLog(`行业分布过滤: ${riskText}`, 'info');
+                updateChartsData();
+            });
+        });
+
+        // 全选按钮
+        document.getElementById('selectAllRisks').addEventListener('click', () => {
+            document.querySelectorAll('.industry-risk-filter').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            addLog('行业分布过滤: 全部选中', 'info');
+            updateChartsData();
+        });
+
+        // 清空按钮
+        document.getElementById('deselectAllRisks').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.industry-risk-filter');
+            let checkedCount = 0;
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) checkedCount++;
+            });
+            
+            if (checkedCount === 0) {
+                addLog('已经全部清空', 'info');
+                return;
+            }
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // 至少保留一个选中，默认选中安全
+            checkboxes[0].checked = true;
+            addLog('行业分布过滤: 仅显示安全', 'info');
+            updateChartsData();
+        });
 
         // 页面加载完成后初始化
         window.addEventListener('load', init);
