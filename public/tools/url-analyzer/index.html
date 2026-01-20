@@ -1042,6 +1042,7 @@
             const urlColumn = sourceData.urlColumn || 'url';
             const urlData = sourceData.Sheet1; // 保留完整数据对象，包含count字段
             const total = urlData.length;
+            analyzedResults.length = 0;
 
             addLog(`开始分析全部数据，共 ${total} 个唯一URL，并发数: ${concurrent}`, 'info');
 
@@ -1089,6 +1090,30 @@
                             urlsToAnalyze.push({
                                 url: url,
                                 item: item
+                            });
+                        }
+                    }
+
+                    // 处理历史记录中的URL
+                    if (historyUrls.length > 0) {
+                        addLog(`从历史记录中加载 ${historyUrls.length} 个URL`, 'info');
+                        
+                        for (const {url, item, historyData} of historyUrls) {
+                            const index = batch.startIndex + batch.data.indexOf(item);
+                            const count = item.count || 1;
+
+                            analyzedResults.push({
+                                index: index + 1,
+                                url,
+                                count,
+                                title: historyData.title,
+                                keywords: historyData.keywords,
+                                description: historyData.description,
+                                summary: historyData.summary,
+                                industry: historyData.industry,
+                                risk: historyData.risk,
+                                why: historyData.why,
+                                status: 'completed'
                             });
                         }
                     }
