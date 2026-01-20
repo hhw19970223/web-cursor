@@ -86,8 +86,13 @@ export async function POST(request: Request) {
             const json = JSON.parse(result.code);
             return { url, data: json };
           } catch (e) {
-            console.error("Error parsing JSON for URL:", url, result.code);
-            return { url, data: { error: "JSON解析失败", raw: result.code } };
+            try {
+              const json = JSON.parse(result.code);
+              return { url, data: json };
+            } catch (e) {
+              console.error("Error parsing JSON for URL:", url, result.code);
+              return { url, data: { error: "JSON解析失败", raw: result.code } };
+            }
           }
         } else {
           console.error("No result received for URL:", url);
@@ -270,9 +275,6 @@ async function cursorMessageStream(options: any) {
         try {
           const jsonStr = line.substring(6); // 移除 "data: " 前缀
           const data = JSON.parse(jsonStr);
-
-          console.log('--------------------------->')
-          console.log(data)
 
           if (data?.message?.streamUnifiedChatResponse) {
             const streamUnifiedChatResponse =
