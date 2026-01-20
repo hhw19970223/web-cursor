@@ -1,3 +1,4 @@
+const urlParams = new URLSearchParams(window.location.search);
 
 function X7c() {
   const i = new Uint8Array(16);
@@ -317,3 +318,53 @@ async function cursorMessageStream(options) {
  *   console.error('生成失败:', error);
  * }
  */  
+
+
+// 创建任务队列
+class TaskQueue {
+  constructor(concurrency = 5) {
+      this.concurrency = concurrency; // 并发数
+      this.running = 0; // 当前运行的任务数
+      this.queue = []; // 待执行任务队列
+      this.results = []; // 结果数组
+  }
+
+  // 添加任务到队列
+  add(task) {
+      return new Promise((resolve, reject) => {
+          this.queue.push({ task, resolve, reject });
+          this.run();
+      });
+  }
+
+  // 执行队列中的任务
+  async run() {
+      // 如果正在运行的任务数达到并发限制，或队列为空，则返回
+      if (this.running >= this.concurrency || this.queue.length === 0) {
+          return;
+      }
+
+      // 取出队列中的第一个任务
+      const { task, resolve, reject } = this.queue.shift();
+      this.running++;
+
+      try {
+          const result = await task();
+          resolve(result);
+          this.results.push(result);
+      } catch (error) {
+          reject(error);
+      } finally {
+          this.running--;
+          this.run(); // 继续执行下一个任务
+      }
+  }
+
+  // 等待所有任务完成
+  async waitAll() {
+      while (this.running > 0 || this.queue.length > 0) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      return this.results;
+  }
+}

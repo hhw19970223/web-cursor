@@ -643,134 +643,170 @@
         }
 
 
-        // 模拟URL分析
-        async function analyzeUrl(url, index, count = 1) {
-            // 模拟网络请求延迟
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+        //         // 模拟URL分析
+        //         async function analyzeUrl(url, index, count = 1) {
+        //             // 模拟网络请求延迟
+        //             await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
 
-            // 模拟提取数据
-            const domain = extractDomain(url);
-            let title = ``;
-            let keywords = '';
-            let description = `这是 ${domain} 的网站描述，提供各种服务...`;
-            let h1 = '';
-            let h2 = '';
-            let h3 = '';
-            let flag = false;
+        //             // 模拟提取数据
+        //             const domain = extractDomain(url);
+        //             let title = ``;
+        //             let keywords = '';
+        //             let description = `这是 ${domain} 的网站描述，提供各种服务...`;
+        //             let h1 = '';
+        //             let h2 = '';
+        //             let h3 = '';
+        //             let flag = false;
 
 
-            let summary = '';
-            let industry = '';
-            let risk = '未知';
+        //             let summary = '';
+        //             let industry = '';
+        //             let risk = '未知';
 
-            const text = `请分析以下网站信息并返回JSON格式的分析结果：
+        //             const text = `请分析以下网站信息并返回JSON格式的分析结果：
 
-网站URL: ${url}
+        // 网站URL: ${url}
 
-请完成以下任务：
-1. 访问并分析该网站的内容和特征，并且记录下网站头部信息的title，keywords和description
-2. 根据提供的标题、关键词和描述，生成一句话的网站总结（100字以内）
-3. 判断网站所属行业类别（从以下选项中选择最合适的一个）：电子商务、金融服务、科技/IT、教育培训、医疗健康、房地产、汽车、媒体/娱乐、社交网络、餐饮美食、旅游、企业服务、其他
-4. 评估网站风险等级，判断是否涉及色情、赌博或其他灰色产业，风险等级分为：高风险、可疑、安全
-5. 说明风险评估的具体原因
-6. 帮我生成以下固定格式的json数据
+        // 请完成以下任务：
+        // 1. 访问并分析该网站的内容和特征，并且记录下网站头部信息的title，keywords和description
+        // 2. 根据提供的标题、关键词和描述，生成一句话的网站总结（100字以内）
+        // 3. 判断网站所属行业类别（从以下选项中选择最合适的一个）：电子商务、金融服务、科技/IT、教育培训、医疗健康、房地产、汽车、媒体/娱乐、社交网络、餐饮美食、旅游、企业服务、赌博、其他
+        // 4. 评估网站风险等级，判断是否涉及色情、赌博或其他灰色产业，风险等级分为：高风险、可疑、安全
+        // 5. 说明风险评估的具体原因
+        // 6. 帮我生成以下固定格式的json数据
 
-**important**: 请不要使用CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2工具
+        // **important**: 请不要使用CLIENT_SIDE_TOOL_V2_RUN_TERMINAL_COMMAND_V2工具
 
-**重要：请严格按照以下JSON格式，不要包含任何其他文字说明：**
+        // **重要：请严格按照以下JSON格式，不要包含任何其他文字说明：**
 
-{
-  "summary": "对网站的总结描述（100字以内）",
-  "industry": "所属行业分类",
-  "risk": "风险等级（高风险/可疑/安全）",
-  "why": "风险评估等级的原因说明"，
-  "description": "网站描述"
-  "keywords": "关键词"
-  "title": "标题"
-}`
+        // {
+        //   "summary": "对网站的总结描述（100字以内）",
+        //   "industry": "所属行业分类",
+        //   "risk": "风险等级（高风险/可疑/安全）",
+        //   "why": "风险评估等级的原因说明"，
+        //   "description": "网站描述"
+        //   "keywords": "关键词"
+        //   "title": "标题"
+        // }`
+
+        //             try {
+        //                 const stream = await cursorMessageStream({
+        //                     prompt: text,
+        //                 });
+
+        //                 let result = await stream.wait(); // 阻塞
+
+        //                 if (!result) {
+        //                     const stream = await cursorMessageStream({
+        //                         prompt: text,
+        //                     });
+        //                     result = await stream.wait(); // 阻塞
+        //                     if (!result) {
+        //                         const stream = await cursorMessageStream({
+        //                             prompt: text,
+        //                         });
+        //                         result = await stream.wait(); // 阻塞
+        //                     }
+        //                 }
+
+        //                 try {
+        //                     const json = JSON.parse(result.code);
+        //                     summary = json.summary || '';
+        //                     industry = json.industry || '';
+        //                     risk = json.risk || '';
+        //                     why = json.why || '';
+        //                     description = json.description || '';
+        //                     keywords = json.keywords || '';
+        //                     title = json.title || '';
+        //                     flag = true;
+        //                 } catch (e) {
+        //                     console.error('Error analyzing URL:', result.code);
+        //                 }
+        //             } catch (e) {
+        //                 console.error('Error analyzing URL:', e);
+        //             }
+
+        //             try {
+        //                 if (!flag) {
+        //                     const result = await fetch('/api/url', {
+        //                         method: 'POST',
+        //                         body: JSON.stringify({
+        //                             url,
+        //                         }),
+        //                     })
+        //                         .then((res) => res.json())
+
+        //                     title = result.title || '';
+        //                     keywords = result.keywords || '';
+        //                     description = result.description || '';
+        //                     h1 = result.h1?.join('|||') || '';
+        //                     h2 = result.h2?.join('|||') || '';
+        //                     h3 = result.h3?.join('|||') || '';
+        //                 }
+
+        //             } catch (error) {
+        //                 console.error('Error analyzing URL:', error);
+        //             }
+
+
+        //             return {
+        //                 index: index + 1,
+        //                 url,
+        //                 count, // 保留数量字段
+        //                 title,
+        //                 keywords,
+        //                 description,
+        //                 summary,
+        //                 industry,
+        //                 risk,
+        //                 why: why || '',
+        //                 status: flag ? 'completed' : 'pending',
+        //                 h1,
+        //                 h2,
+        //                 h3
+        //             };
+        //         }
+
+        // URLS分析
+        async function analyzeUrl(urls) {
 
             try {
-                const stream = await cursorMessageStream({
-                    prompt: text,
+                const accessToken = urlParams.get('accessToken') || '';
+                // 调用后端 API 进行分析
+                const response = await fetch('/api/url-analyzer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        urls,  // 传入URL数组
+                        accessToken
+                    })
                 });
 
-                let result = await stream.wait(); // 阻塞
-
-                if (!result) {
-                    const stream = await cursorMessageStream({
-                        prompt: text,
-                    });
-                    result = await stream.wait(); // 阻塞
-                    if (!result) {
-                        const stream = await cursorMessageStream({
-                            prompt: text,
-                        });
-                        result = await stream.wait(); // 阻塞
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                try {
-                    const json = JSON.parse(result.code);
-                    summary = json.summary || '';
-                    industry = json.industry || '';
-                    risk = json.risk || '';
-                    why = json.why || '';
-                    description = json.description || '';
-                    keywords = json.keywords || '';
-                    title = json.title || '';
-                    flag = true;
-                } catch (e) {
-                    console.error('Error analyzing URL:', result.code);
-                }
-            } catch (e) {
-                console.error('Error analyzing URL:', e);
-            }
-
-            try {
-                if (!flag) {
-                    const result = await fetch('/api/url', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            url,
-                        }),
-                    })
-                        .then((res) => res.json())
-
-                    title = result.title || '';
-                    keywords = result.keywords || '';
-                    description = result.description || '';
-                    h1 = result.h1?.join('|||') || '';
-                    h2 = result.h2?.join('|||') || '';
-                    h3 = result.h3?.join('|||') || '';
-                }
+                const result = await response.json();
+                return result;
 
             } catch (error) {
-                console.error('Error analyzing URL:', error);
+                console.error('analyzeUrl error:', error);
+                throw error;
             }
-
-
-            return {
-                index: index + 1,
-                url,
-                count, // 保留数量字段
-                title,
-                keywords,
-                description,
-                summary,
-                industry,
-                risk,
-                why: why || '',
-                status: flag ? 'completed' : 'pending',
-                h1,
-                h2,
-                h3
-            };
         }
-
 
         // 开始分析
         async function startAnalysis() {
             if (isAnalyzing) return;
+
+            const accessToken = urlParams.get('accessToken') || '';
+
+            if (!accessToken) {
+                alert('accessToken 参数是必需的');
+                throw new Error('accessToken 参数是必需的，请在 URL 中添加 ?accessToken=你的token');
+            }
 
             if (!sourceData || !sourceData.Sheet1 || sourceData.Sheet1.length === 0) {
                 alert('⚠️ 请先上传包含URL数据的文件');
@@ -792,85 +828,137 @@
 
             addLog(`开始分析全部数据，共 ${total} 个唯一URL，并发数: ${concurrent}`, 'info');
 
-            // 创建任务队列
-            class TaskQueue {
-                constructor(concurrency = 5) {
-                    this.concurrency = concurrency; // 并发数
-                    this.running = 0; // 当前运行的任务数
-                    this.queue = []; // 待执行任务队列
-                    this.results = []; // 结果数组
-                }
 
-                // 添加任务到队列
-                add(task) {
-                    return new Promise((resolve, reject) => {
-                        this.queue.push({ task, resolve, reject });
-                        this.run();
-                    });
-                }
+            // 将URL按50个一组分批
+            const BATCH_SIZE = 5;
+            const batches = [];
 
-                // 执行队列中的任务
-                async run() {
-                    // 如果正在运行的任务数达到并发限制，或队列为空，则返回
-                    if (this.running >= this.concurrency || this.queue.length === 0) {
-                        return;
-                    }
-
-                    // 取出队列中的第一个任务
-                    const { task, resolve, reject } = this.queue.shift();
-                    this.running++;
-
-                    try {
-                        const result = await task();
-                        resolve(result);
-                        this.results.push(result);
-                    } catch (error) {
-                        reject(error);
-                    } finally {
-                        this.running--;
-                        this.run(); // 继续执行下一个任务
-                    }
-                }
-
-                // 等待所有任务完成
-                async waitAll() {
-                    while (this.running > 0 || this.queue.length > 0) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                    return this.results;
-                }
+            for (let i = 0; i < urlData.length; i += BATCH_SIZE) {
+                const batchData = urlData.slice(i, i + BATCH_SIZE);
+                batches.push({
+                    startIndex: i,
+                    data: batchData
+                });
             }
 
-            // 使用队列方式分析
+            addLog(`已分为 ${batches.length} 批次，每批最多 ${BATCH_SIZE} 个URL`, 'info');
+
+            // 使用队列方式分析每个批次
             const taskQueue = new TaskQueue(concurrent);
 
-            // 将所有URL添加到队列
-            for (let i = 0; i < total; i++) {
+            // 将所有批次添加到队列
+            for (const batch of batches) {
                 if (!isAnalyzing) break;
 
-                const item = urlData[i];
-                const url = item.url || item[urlColumn];
-                const count = item.count || 1;
-
-                // 添加任务到队列（不等待）
+                // 添加批次任务到队列（不等待）
                 taskQueue.add(async () => {
-                    const result = await analyzeUrl(url, i, count);
+                    const urls = batch.data.map(item => item.url || item[urlColumn]);
 
-                    // 每完成一个任务就更新UI
-                    analyzedResults.push(result);
-                    updateStats();
-                    updateProgress(analyzedResults.length, total);
-                    updateTable();
-                    updateChartsData();
+                    addLog(`正在分析批次: ${batch.startIndex + 1} - ${batch.startIndex + urls.length}`, 'info');
 
-                    if (analyzedResults.length % 10 === 0) {
-                        addLog(`已完成 ${analyzedResults.length}/${total}`, 'success');
+                    try {
+                        // 调用API分析这一批URL
+                        let result = await analyzeUrl(urls);
+
+                        // 检查返回结果
+                        if (!result.success || !result.data) {
+                            result = await analyzeUrl(urls);//再试一次
+                            if (!result.success || !result.data) {
+                                throw new Error('API返回数据格式错误');
+                                result = await analyzeUrl(urls);//再试一次
+                            }
+                        }
+
+                        // 处理每个URL的结果
+                        for (let i = 0; i < batch.data.length; i++) {
+                            const item = batch.data[i];
+                            const url = item.url || item[urlColumn];
+                            const count = item.count || 1;
+                            const index = batch.startIndex + i;
+
+                            const data = result.data[url];
+
+                            let urlResult;
+                            if (!data || data.error) {
+                                // 处理错误情况
+                                urlResult = {
+                                    index: index + 1,
+                                    url,
+                                    count,
+                                    title: '',
+                                    keywords: '',
+                                    description: '',
+                                    summary: '',
+                                    industry: '未知',
+                                    risk: '未知',
+                                    why: data?.error || '未知错误',
+                                    status: '分析失败'
+                                };
+                            } else {
+                                // 处理成功情况
+                                urlResult = {
+                                    index: index + 1,
+                                    url,
+                                    count,
+                                    title: data.title || '',
+                                    keywords: data.keywords || '',
+                                    description: data.description || '',
+                                    summary: data.summary || '',
+                                    industry: data.industry || '其他',
+                                    risk: data.risk || '未知',
+                                    why: data.why || '',
+                                    status: 'completed'
+                                };
+                            }
+
+                            analyzedResults.push(urlResult);
+                        }
+
+                        // 批量更新UI
+                        updateStats();
+                        updateProgress(analyzedResults.length, total);
+                        updateTable();
+                        updateChartsData();
+
+                        addLog(`批次完成: ${batch.startIndex + 1} - ${batch.startIndex + urls.length}，总进度 ${analyzedResults.length}/${total}`, 'success');
+
+                        return urls.length;
+                    } catch (error) {
+                        console.error('批次分析出错:', error);
+                        addLog(`批次分析失败 (${batch.startIndex + 1} - ${batch.startIndex + batch.data.length}): ${error.message}`, 'error');
+
+                        // 即使失败也要记录错误结果
+                        for (let i = 0; i < batch.data.length; i++) {
+                            const item = batch.data[i];
+                            const url = item.url || item[urlColumn];
+                            const count = item.count || 1;
+                            const index = batch.startIndex + i;
+
+                            analyzedResults.push({
+                                index: index + 1,
+                                url,
+                                count,
+                                title: '',
+                                keywords: '',
+                                description: '',
+                                summary: '批次分析失败',
+                                industry: '未知',
+                                risk: '未知',
+                                why: error.message,
+                                status: 'error'
+                            });
+                        }
+
+                        // 更新UI
+                        updateStats();
+                        updateProgress(analyzedResults.length, total);
+                        updateTable();
+                        updateChartsData();
+
+                        throw error;
                     }
-
-                    return result;
                 }).catch(error => {
-                    console.error('Error analyzing URL:', error);
-                    addLog(`URL分析出错: ${error.message}`, 'error');
+                    console.error('Error in batch task:', error);
                 });
             }
 
