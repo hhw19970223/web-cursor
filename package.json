@@ -45,6 +45,7 @@
     "embla-carousel-react": "^8.6.0",
     "flowbite": "2.3.0",
     "flowbite-react": "0.10.1",
+    "html2canvas": "^1.4.1",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "linkedom": "^0.18.12",
