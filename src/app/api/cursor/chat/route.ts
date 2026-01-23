@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         }
         const uint8 = base64ToUint8ArrayInNode(image.data);
         image.data = uint8;
-        images[i] = new Ur(image);
+        image.taskSpecificDescription = `this The file name is ${image.filename}`
       }
     }
 

@@ -1,4 +1,4 @@
-import { gp, hXe, lKe, pc, st, xu } from "../service/common";
+import { gp, hXe, lKe, pc, st, Ur, xu } from "../service/common";
 
 export const composerMap: any = {};
 
@@ -140,30 +140,40 @@ export const getReqChatExample = (
         text,
         type: 1,
         attachedCodeChunks: [
-          new gp({
+          ...(code ?[ new gp({
             relativeWorkspacePath: "index.html",
             startLineNumber: 1,
-            lines: code?.split("\n") || '',
+            lines: code?.split("\n") || [''],
             languageIdentifier: "",
             intent: 1,
             isOnlyIncludedFromFolder: false,
-          }),
-          new gp({
+          })]:[]),
+          ...(ts ?[ new gp({
             relativeWorkspacePath: 'index.ts',
             startLineNumber: 1,
-            lines: ts?.split("\n") || '',
+            lines: ts?.split("\n") || [''],
             languageIdentifier: "",
             intent: 1,
             isOnlyIncludedFromFolder: false,
-          }),
-          new gp({
+          })]:[]),
+          ...(json ?[ new gp({
             relativeWorkspacePath: 'index.json',
             startLineNumber: 1,
-            lines: json?.split("\n") || '',
+            lines: json?.split("\n") || [''],
             languageIdentifier: "",
             intent: 1,
             isOnlyIncludedFromFolder: false,
-          }),
+          })]:[]),
+          ...images.map((items) => {
+            return {
+              intent: 8,
+              isOnlyIncludedFromFolder: false,
+              languageIdentifier: "",
+              lines: items.data?.toString('utf8')?.split("\n") || [''],
+              relativeWorkspacePath: items.filename,
+              startLineNumber: 1
+            }
+          })
         ],
         codebaseContextChunks: [],
         commits: [],
@@ -171,7 +181,7 @@ export const getReqChatExample = (
         gitDiffs: [],
         assistantSuggestedDiffs: [],
         interpreterResults: [],
-        images,
+        images: images.map(item => new Ur(item)),
         attachedFolders: [],
         approximateLintErrors: [],
         bubbleId,

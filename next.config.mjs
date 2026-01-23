@@ -13,7 +13,7 @@ const nextConfig = {
     // 配置请求体大小限制
     serverRuntimeConfig: {
         // 服务器端运行时配置
-        bodySizeLimit: '50mb',
+        bodySizeLimit: '200mb',
     },
 };
 
