@@ -177,7 +177,7 @@ export async function PATCH(request: Request) {
     }
 
     // 存储合并后的数据到 dataMap
-    dataMap[uuid] = mergedData;
+    dataMap[uuid] = JSON.parse(mergedData);
 
     // 清理上传会话
     delete chunkUploadMap[uuid];
