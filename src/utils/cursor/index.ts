@@ -17,9 +17,7 @@ export const traceparent = `00-${X7c()}-${Q7c()}-00`;
 
 async function uploadChatLargeData(uuid: string, largeData: any) {
   // 1. 将大数据分块
-  // Next.js API 路由默认限制 4MB，考虑 JSON 包装后的额外开销
-  // 设置每块为 1MB，既能保证传输效率，又不会超过限制
-  const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB = 1,048,576 字节
+  const CHUNK_SIZE = 512 * 1024; // 1MB = 1,048,576 字节
   const dataString = JSON.stringify(largeData);
   const totalSize = dataString.length;
   const totalChunks = Math.ceil(totalSize / CHUNK_SIZE);
